@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: Salv AML alert data-upload API
+  description: '# Introduction
+
+    Welcome to the Salv AML API documentation.
+
+
+    The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
+
+
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
+
+    '
+  version: 1.0.9
+  contact:
+    name: Support
+    email: support@salv.com
+  x-logo:
+    url: salv.svg
+    altText: Salv API
+servers:
+- url: https://{environment}.salv.com/api/
+  variables:
+    environment:
+      default: app
+      enum:
+      - app
+      - demo
+      description: 'Select environment:
+
+        * `app` - Production
+
+        * `demo` - Sandbox
+
+        '
+security:
+- OAuth2:
+  - aml
+tags:
+- name: data-upload
+  x-displayName: Data upload from CSV
+  description: "## Steps to upload data using CSV\n1. Format the  csv file and add all the mandatory data fields indicated in the  [User Manual](https://help.salv.com/en/articles/154650-data-overview)\n\n2. Upload the [csv file via API](#tag/data-upload/operation/uploadData).  Note: the upload API response contains the id that will to be used in status check API call (step 3). \nWhen a data file has been successfully uploaded, an HTTP response with 202 status code is returned. A response with 202 status code indicates that the file has been uploaded successfully and the system will try to process the data. It does not guarantee that data will be successfully processed.\n\n      What will happen next?\n      1.  First comes the **validation phase**: \n          1. If the Schemas are added in the UI, then our system will validate the file against the schemas (e.g. if there is a field added with DATE type, then system will validate if the date format is correct)\n          2. If no Schemas are added in the UI, then our system will consider all fields as STRING\n\n          Note: during this validation phase we do not check if the transaction has been added to the system before. \n\n          3. If there are any errors, then no data will be uploaded. In this case calling [check status API call](#tag/data-upload/operation/getDataUploadStatus) will return FAILED status and a error message for the the first error encountered. The error message will be in the `reason` field in a human readable text. \n          4. If there are no errors, then the upload phase starts.\n\n      2. Second (if no errors occurred) comes the **upload phase**: our system will start uploading and saving data in batches of 1000, and in case of transaction file will check for duplicates and if the person is present in the system.  \n          1. If no errors occur, then the file is uploaded successfully.\n          2. If an error occurs, then when step no 3 ([check status API call](#tag/data-upload/operation/getDataUploadStatus)) is done, then: \n              1. system will show the first error and give the id of the person or transaction that caused the error. \n              2. system will show the id of the last uploaded person or transaction and the id of the first person or transaction that was not uploaded.\n\n              and, \n\n              3. the data following the last uploaded person or transaction will not be uploaded. \n      - Example:\n\n        > Csv file has 200 000 rows. There is a duplicate id on row 87 456.  In **validation phase** duplicate errors are not checked thus the file will move on to the **upload phase**. First 87 000 rows are uploaded without any errors. Rows starting from 87 001 will not get uploaded because there is a duplicate error in the batch (the patch of 1000 that gets checked). System will show that there is a duplicate, will show the id of the duplicate Person or Transaction and will show the last uploaded Person or Transaction id and the last id that was not added. \n\n        Example of an **upload phase** error message:\n\n        ```jsx\n        {\n            \"status\": \"PARTIALLY_COMPLETED\",\n            \"reason\": \"The upload appears to contain transactions (id ameio-1234567) that have already been added to Salv. Please make sure that your upload does not contain any duplicates or transactions that have already been added to Salv. The first transaction not added to Salv with this upload has id fmeio-1234567. Last processed and saved row was with id: dseio-1234567\"\n        }\n        ```\n\n3. In order to check the status of the file upload either use [get status of data upload API call](#tag/data-upload/operation/getDataUploadStatus) or check Data upload page on app.salv.com. This will provide the status and any further information about the errors.\n"
+paths:
+  /v1/data-upload:
+    post:
+      tags:
+      - data-upload
+      summary: Upload data from a CSV file
+      description: Upload a list of person, person relation, or transaction data in a CSV format. Files up to 100M are supported. File processing happens asynchronously.
+      operationId: uploadData
+      parameters:
+      - name: type
+        in: query
+        description: Which type of data to upload
+        required: true
+        schema:
+          $ref: models.yaml#/components/schemas/ApiDataUploadType
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        '202':
+          description: Data file accepted
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/ApiDataUpload
+        '400':
+          description: Data file invalid
+  /v1/data-upload/{uploadId}/status:
+    get:
+      tags:
+      - data-upload
+      summary: Get status of data upload
+      operationId: getDataUploadStatus
+      parameters:
+      - name: uploadId
+        in: path
+        description: ID of data upload
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/ApiDataUploadStatus
+        '404':
+          description: Data upload not found
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: 'In order to use the API, you need to generate client credentials using [Salv UI](https://demo.salv.com/credentials).
+
+        Never share your secret keys. Keep them guarded and secure.
+
+
+        We use OAuth2 client credentials flow to issue our API tokens.
+
+        By default our API tokens have expiration time of 50 years, so effectively they never expire.
+
+        Please do not make any assumptions about the content of the access_token.
+
+        At the moment we use a JWT token, but it can change to any other string with the future updates.
+
+
+        An API token can be invalidated using Salv UI by deleting the client credentials that were used to generate the token.
+
+
+        Please make sure you only request it once per reasonable amount of time,
+
+        as `oauth/token` endpoint has a rate limit of **10 requests per minute** per IP address.
+
+
+        | Environment | Token URL |
+
+        |-------------|-----------|
+
+        | Production | `https://app.salv.com/oauth/token` |
+
+        | Sandbox | `https://demo.salv.com/oauth/token` |
+
+
+        Use the token URL matching your selected server environment.
+
+        '
+      flows:
+        clientCredentials:
+          tokenUrl: https://app.salv.com/oauth/token
+          x-tokenUrl-sandbox: https://demo.salv.com/oauth/token
+          scopes:
+            aml: Can use AML API
+x-tagGroups:
+- name: General
+  tags:
+  - changelog
+  - getting-started
+  - data-upload
+  - aml
+  - note
+  - webhooks
+  - custom-list-record
+  - custom-list-usable-field-public
+- name: Monitoring
+  tags:
+  - monitoring-overview
+  - monitoring-checks
+  - alert
+- name: Screening
+  tags:
+  - screening-overview
+  - screening-checks
+  - screening-searches
+  - screening-list-groups
+  - screening-alerts
+- name: Risks
+  tags:
+  - risk
+- name: Alert management
+  tags:
+  - alerts
+  - manual-alerts
+- name: Deprecated
+  tags:
+  - unresolved-alerts

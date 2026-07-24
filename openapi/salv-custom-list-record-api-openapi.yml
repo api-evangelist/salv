@@ -1,0 +1,377 @@
+openapi: 3.0.3
+info:
+  title: Salv AML alert custom-list-record API
+  description: '# Introduction
+
+    Welcome to the Salv AML API documentation.
+
+
+    The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
+
+
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
+
+    '
+  version: 1.0.9
+  contact:
+    name: Support
+    email: support@salv.com
+  x-logo:
+    url: salv.svg
+    altText: Salv API
+servers:
+- url: https://{environment}.salv.com/api/
+  variables:
+    environment:
+      default: app
+      enum:
+      - app
+      - demo
+      description: 'Select environment:
+
+        * `app` - Production
+
+        * `demo` - Sandbox
+
+        '
+security:
+- OAuth2:
+  - aml
+tags:
+- name: custom-list-record
+  description: 'Endpoints to add, update, delete and get custom list records.
+
+
+    Custom Lists can be used in two ways:
+
+    - Custom Lists can be used to screen persons and transactions against them in the same way it works for Dow Jones
+
+    lists. For example, if a client has some in-house black list, it can be added to screening as custom list.
+
+    - Custom Lists can be referenced in monitoring scenarios. For example, a scenario may trigger when the transaction
+
+    amount is higher than some threshold and the recipient country is in custom list of high risk countries.
+
+    '
+  x-displayName: Custom Lists
+paths:
+  /v1/custom-lists/{customListId}/records:
+    get:
+      tags:
+      - custom-list-record
+      summary: Get batch records
+      operationId: getRecords
+      parameters:
+      - name: customListId
+        in: path
+        description: ID of the custom list
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: models.yaml#/components/parameters/pageParam
+      - $ref: models.yaml#/components/parameters/sizeParam
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/CustomListRecordPage
+              examples:
+                Individual:
+                  value:
+                    number: 0,
+                    size: 20,
+                    total: 1223
+                    content:
+                    - id: sdf12345
+                      attributes:
+                        first_name: Sheldon
+                        last_name: Cooper
+                        dob: '1983-05-12'
+                        foo: bar
+                        city: Pasadena
+                        street_address: 2311 North Los Robles Avenue
+                        country: US
+                        gender: M
+                        bank_account_numbers:
+                        - AR45500231529936926440
+                        - CY91660740448833368
+        '400':
+          description: Invalid input
+    post:
+      tags:
+      - custom-list-record
+      summary: Create custom list record
+      operationId: addRecord
+      parameters:
+      - name: customListId
+        in: path
+        description: ID of the custom list
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: models.yaml#/components/schemas/ApiCustomListRecord
+            examples:
+              Individual:
+                value:
+                  id: sdf12345
+                  attributes:
+                    first_name: Sheldon
+                    last_name: Cooper
+                    dob: '1983-05-12'
+                    foo: bar
+                    city: Pasadena
+                    street_address: 2311 North Los Robles Avenue
+                    country: US
+                    gender: M
+                    bank_account_numbers:
+                    - AR45500231529936926440
+                    - CY91660740448833368
+              Legal:
+                value:
+                  id: bbt12347
+                  attributes:
+                    company_name: Footprints on the Moon
+                    country: CA
+                    city: Pasadena
+                    street_address: 2311 North Los Robles Avenue
+                    foo: bar
+                    shareholders:
+                    - id: shrhldr-1
+                      first_name: Howard
+                      last_name: Wolowitz
+                      dob: '1988-07-06'
+                      citizenship: IL
+                    - id: shrhldr-2
+                      first_name: Raj
+                      last_name: Koothrappali
+                      dob: '1989-05-06'
+                      citizenship: IN
+                    - id: shrhldr-3
+                      company_name: BIG Invest LLC
+                      country: GB
+                    business_reg_number: 98-7654321
+      responses:
+        '200':
+          description: Created new custom list record
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/ApiCustomListRecord
+        '400':
+          description: Invalid input
+  /v1/custom-lists/{customListId}/records/{id}:
+    get:
+      tags:
+      - custom-list-record
+      summary: Get single Record
+      operationId: getRecord
+      parameters:
+      - name: customListId
+        in: path
+        description: ID of the custom list
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: path
+        description: ID of the record to be fetched
+        required: true
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Single custom list record
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/ApiCustomListRecord
+        '400':
+          description: Invalid input
+    put:
+      tags:
+      - custom-list-record
+      summary: Update custom list record
+      operationId: updateRecord
+      parameters:
+      - name: customListId
+        in: path
+        description: ID of the custom list
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: path
+        description: ID of the record to be updated
+        required: true
+        schema:
+          type: string
+          minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: models.yaml#/components/schemas/ApiCustomListRecord
+            examples:
+              Individual:
+                value:
+                  id: sdf12345
+                  attributes:
+                    first_name: Sheldon
+                    last_name: Cooper
+                    dob: '1983-05-12'
+                    foo: bar
+                    city: Pasadena
+                    street_address: 2311 North Los Robles Avenue
+                    country: US
+                    gender: M
+                    bank_account_numbers:
+                    - AR45500231529936926440
+                    - CY91660740448833368
+              Legal:
+                value:
+                  id: bbt12347
+                  attributes:
+                    company_name: Footprints on the Moon
+                    country: CA
+                    city: Pasadena
+                    street_address: 2311 North Los Robles Avenue
+                    foo: bar
+                    shareholders:
+                    - id: shrhldr-1
+                      first_name: Howard
+                      last_name: Wolowitz
+                      dob: '1988-07-06'
+                      citizenship: IL
+                    - id: shrhldr-2
+                      first_name: Raj
+                      last_name: Koothrappali
+                      dob: '1989-05-06'
+                      citizenship: IN
+                    - id: shrhldr-3
+                      company_name: BIG Invest LLC
+                      country: GB
+                    business_reg_number: 98-7654321
+      responses:
+        '200':
+          description: Updated custom list record
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/ApiCustomListRecord
+        '400':
+          description: Invalid input
+    delete:
+      tags:
+      - custom-list-record
+      summary: Archive custom list record
+      operationId: deleteRecord
+      parameters:
+      - name: customListId
+        in: path
+        description: ID of the custom list
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: id
+        in: path
+        description: ID of the record to be deleted
+        required: true
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: Deleted custom list record
+        '400':
+          description: Invalid input
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: 'In order to use the API, you need to generate client credentials using [Salv UI](https://demo.salv.com/credentials).
+
+        Never share your secret keys. Keep them guarded and secure.
+
+
+        We use OAuth2 client credentials flow to issue our API tokens.
+
+        By default our API tokens have expiration time of 50 years, so effectively they never expire.
+
+        Please do not make any assumptions about the content of the access_token.
+
+        At the moment we use a JWT token, but it can change to any other string with the future updates.
+
+
+        An API token can be invalidated using Salv UI by deleting the client credentials that were used to generate the token.
+
+
+        Please make sure you only request it once per reasonable amount of time,
+
+        as `oauth/token` endpoint has a rate limit of **10 requests per minute** per IP address.
+
+
+        | Environment | Token URL |
+
+        |-------------|-----------|
+
+        | Production | `https://app.salv.com/oauth/token` |
+
+        | Sandbox | `https://demo.salv.com/oauth/token` |
+
+
+        Use the token URL matching your selected server environment.
+
+        '
+      flows:
+        clientCredentials:
+          tokenUrl: https://app.salv.com/oauth/token
+          x-tokenUrl-sandbox: https://demo.salv.com/oauth/token
+          scopes:
+            aml: Can use AML API
+x-tagGroups:
+- name: General
+  tags:
+  - changelog
+  - getting-started
+  - data-upload
+  - aml
+  - note
+  - webhooks
+  - custom-list-record
+  - custom-list-usable-field-public
+- name: Monitoring
+  tags:
+  - monitoring-overview
+  - monitoring-checks
+  - alert
+- name: Screening
+  tags:
+  - screening-overview
+  - screening-checks
+  - screening-searches
+  - screening-list-groups
+  - screening-alerts
+- name: Risks
+  tags:
+  - risk
+- name: Alert management
+  tags:
+  - alerts
+  - manual-alerts
+- name: Deprecated
+  tags:
+  - unresolved-alerts

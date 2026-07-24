@@ -1,0 +1,167 @@
+openapi: 3.0.3
+info:
+  title: Salv AML alert screening-checks API
+  description: '# Introduction
+
+    Welcome to the Salv AML API documentation.
+
+
+    The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
+
+
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
+
+    '
+  version: 1.0.9
+  contact:
+    name: Support
+    email: support@salv.com
+  x-logo:
+    url: salv.svg
+    altText: Salv API
+servers:
+- url: https://{environment}.salv.com/api/
+  variables:
+    environment:
+      default: app
+      enum:
+      - app
+      - demo
+      description: 'Select environment:
+
+        * `app` - Production
+
+        * `demo` - Sandbox
+
+        '
+security:
+- OAuth2:
+  - aml
+tags:
+- name: screening-checks
+  description: Screening checks for transaction and person.
+  x-displayName: Screening checks
+paths:
+  /v1/transactions/{id}/screening-checks:
+    post:
+      tags:
+      - screening-checks
+      summary: Screen transaction
+      description: Transaction is screened. Selection of screened attributes come from configuration.
+      operationId: checkTransaction
+      parameters:
+      - name: id
+        in: path
+        description: external ID of the transaction to screen
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/ApiScreeningResult
+        '400':
+          description: Invalid input
+  /v1/persons/{id}/screening-checks:
+    post:
+      tags:
+      - screening-checks
+      summary: Screen person
+      description: Person is screened. Selection of screened attributes come from configuration.
+      operationId: checkPerson
+      parameters:
+      - name: id
+        in: path
+        description: external ID of the person to screen
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/ApiScreeningResult
+        '400':
+          description: Invalid input
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: 'In order to use the API, you need to generate client credentials using [Salv UI](https://demo.salv.com/credentials).
+
+        Never share your secret keys. Keep them guarded and secure.
+
+
+        We use OAuth2 client credentials flow to issue our API tokens.
+
+        By default our API tokens have expiration time of 50 years, so effectively they never expire.
+
+        Please do not make any assumptions about the content of the access_token.
+
+        At the moment we use a JWT token, but it can change to any other string with the future updates.
+
+
+        An API token can be invalidated using Salv UI by deleting the client credentials that were used to generate the token.
+
+
+        Please make sure you only request it once per reasonable amount of time,
+
+        as `oauth/token` endpoint has a rate limit of **10 requests per minute** per IP address.
+
+
+        | Environment | Token URL |
+
+        |-------------|-----------|
+
+        | Production | `https://app.salv.com/oauth/token` |
+
+        | Sandbox | `https://demo.salv.com/oauth/token` |
+
+
+        Use the token URL matching your selected server environment.
+
+        '
+      flows:
+        clientCredentials:
+          tokenUrl: https://app.salv.com/oauth/token
+          x-tokenUrl-sandbox: https://demo.salv.com/oauth/token
+          scopes:
+            aml: Can use AML API
+x-tagGroups:
+- name: General
+  tags:
+  - changelog
+  - getting-started
+  - data-upload
+  - aml
+  - note
+  - webhooks
+  - custom-list-record
+  - custom-list-usable-field-public
+- name: Monitoring
+  tags:
+  - monitoring-overview
+  - monitoring-checks
+  - alert
+- name: Screening
+  tags:
+  - screening-overview
+  - screening-checks
+  - screening-searches
+  - screening-list-groups
+  - screening-alerts
+- name: Risks
+  tags:
+  - risk
+- name: Alert management
+  tags:
+  - alerts
+  - manual-alerts
+- name: Deprecated
+  tags:
+  - unresolved-alerts

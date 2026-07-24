@@ -1,0 +1,214 @@
+openapi: 3.0.3
+info:
+  title: Salv AML alert screening-alerts API
+  description: '# Introduction
+
+    Welcome to the Salv AML API documentation.
+
+
+    The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
+
+
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
+
+    '
+  version: 1.0.9
+  contact:
+    name: Support
+    email: support@salv.com
+  x-logo:
+    url: salv.svg
+    altText: Salv API
+servers:
+- url: https://{environment}.salv.com/api/
+  variables:
+    environment:
+      default: app
+      enum:
+      - app
+      - demo
+      description: 'Select environment:
+
+        * `app` - Production
+
+        * `demo` - Sandbox
+
+        '
+security:
+- OAuth2:
+  - aml
+tags:
+- name: screening-alerts
+  description: Screening alert is created when a particular field of a particular person matches against one of the screening lists. Screening alert has a list of hits, each of which represent one matched record from screening list. Some of the hits can be cleared automatically according to the configured clearance rules and goodlists.
+  x-displayName: Screening alerts
+paths:
+  /v1/screening-alerts/{screeningAlertId}/hits:
+    get:
+      tags:
+      - screening-alerts
+      summary: Get screening alert hits
+      description: Returns paginated list of screening alert hits by alert id
+      operationId: getScreeningAlertHits
+      parameters:
+      - name: screeningAlertId
+        in: path
+        description: ID of the screening alert for which to return hits
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      - $ref: models.yaml#/components/parameters/pageParam
+      - $ref: models.yaml#/components/parameters/sizeParam
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: models.yaml#/components/schemas/ApiScreeningHitPage
+              examples:
+                individual:
+                  value:
+                    number: 0
+                    size: 1
+                    total: 1
+                    content:
+                    - id: sdf12345
+                      listName: Special Interest Person (SIP)
+                      listProvider: DOW_JONES
+                      listType: ADVERSE_MEDIA
+                      score: 98
+                      attributes:
+                        aliases: Lingjia Huang~Ling-Chia Huang~Ling Chia Huang~Ling Jia Huang
+                        associations:
+                        - association:
+                            associateId: '4286543'
+                            ex: false
+                            name: Siou-Yue Jheng
+                            relationship: Associated Special Interest Person
+                            type: PublicFigure
+                          roles: []
+                        descriptions:
+                          Description1: Special Interest Person (SIP)
+                          Description2: Financial Crime
+                        identificationDetails:
+                          HM Treasury Group ID: '7584'
+                          SECO SSID: '1147'
+                          OFAC Unique ID: '7847'
+                          OFAC Program ID: IRAQ2
+                          DFAT Reference Number: '653'
+                          EU Sanctions Programme Indicator: IRQ
+                          UN Permanent Reference No.: IQi.005
+                          EU Consolidated Electronic List ID: '29'
+                        mainList: Special Interest Person (SIP)
+                        referenceGroupCodes:
+                        - EUCON
+                        - OFACAIS
+                        providers:
+                        - EU
+                        - US-OFAC
+                        name: Ling-Jia Huang
+                        notes: 'Keywords: tax evasion
+
+                          People mentioned: Huang Ling-Jia, Jheng Jing-Tai
+
+                          Companies mentioned: Toki Choi
+
+                          Profile:
+
+                          Huang Ling-Jia, an accountant with internet fashion retailer Toki Choi, was one of 11 individuals given a suspended indictment and ordered to pay between TWD 10,000 and TWD 800,000 to the national treasury by the Taipei District Prosecutors Office on May 6, 2015, for their roles in helping Toki Choi chairman Jheng Jing-Tai to evade TWD 13.25m in company taxes.'
+                        overview: '{"id":"4286548","properties":{"name":["Ling-Jia Huang"],"aliases":["Lingjia Huang","Ling-Chia Huang","Ling Chia Huang","Ling Jia Huang"],"Citizenship":["Taiwan"],"Country of Reported Allegation":["Taiwan"],"Resident of":["Taiwan"],"gender":"Female","deceased":"No"},"referenceCodes":null,"recordDate":"2015-05-31T00:00:00","type":"PERSON","descriptions":{"Description1":"Special Interest Person (SIP)","Description2":"Financial Crime"},"activeStatus":"Active"}'
+                        recordDate: 1433019600.0
+                        roles:
+                        - occupation: International Sporting Organisation Officials
+                          sinceDay: '17'
+                          sinceMonth: Apr
+                          sinceYear: '1960'
+                          title: Alternate Member, Board of Directors, European Investment Bank (EIB)
+                          toDay: null
+                          toMonth: null
+                          toYear: null
+                          type: Primary Occupation
+                        type: PERSON
+        '400':
+          description: Invalid input
+        '404':
+          description: Screening alert not found
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: 'In order to use the API, you need to generate client credentials using [Salv UI](https://demo.salv.com/credentials).
+
+        Never share your secret keys. Keep them guarded and secure.
+
+
+        We use OAuth2 client credentials flow to issue our API tokens.
+
+        By default our API tokens have expiration time of 50 years, so effectively they never expire.
+
+        Please do not make any assumptions about the content of the access_token.
+
+        At the moment we use a JWT token, but it can change to any other string with the future updates.
+
+
+        An API token can be invalidated using Salv UI by deleting the client credentials that were used to generate the token.
+
+
+        Please make sure you only request it once per reasonable amount of time,
+
+        as `oauth/token` endpoint has a rate limit of **10 requests per minute** per IP address.
+
+
+        | Environment | Token URL |
+
+        |-------------|-----------|
+
+        | Production | `https://app.salv.com/oauth/token` |
+
+        | Sandbox | `https://demo.salv.com/oauth/token` |
+
+
+        Use the token URL matching your selected server environment.
+
+        '
+      flows:
+        clientCredentials:
+          tokenUrl: https://app.salv.com/oauth/token
+          x-tokenUrl-sandbox: https://demo.salv.com/oauth/token
+          scopes:
+            aml: Can use AML API
+x-tagGroups:
+- name: General
+  tags:
+  - changelog
+  - getting-started
+  - data-upload
+  - aml
+  - note
+  - webhooks
+  - custom-list-record
+  - custom-list-usable-field-public
+- name: Monitoring
+  tags:
+  - monitoring-overview
+  - monitoring-checks
+  - alert
+- name: Screening
+  tags:
+  - screening-overview
+  - screening-checks
+  - screening-searches
+  - screening-list-groups
+  - screening-alerts
+- name: Risks
+  tags:
+  - risk
+- name: Alert management
+  tags:
+  - alerts
+  - manual-alerts
+- name: Deprecated
+  tags:
+  - unresolved-alerts
