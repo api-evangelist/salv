@@ -1,0 +1,3099 @@
+openapi: 3.0.3
+info:
+  title: Salv AML API
+  description: |
+    # Introduction
+    Welcome to the Salv AML API documentation.
+
+    The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
+
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
+
+  version: 1.0.9
+  contact:
+    name: Support
+    email: support@salv.com
+
+  x-logo:
+    url: "salv.svg"
+    altText: "Salv API"
+
+servers:
+  - url: https://{environment}.salv.com/api/
+    variables:
+      environment:
+        default: app
+        enum:
+          - app
+          - demo
+        description: |
+          Select environment:
+          * `app` - Production
+          * `demo` - Sandbox
+
+tags:
+  - name: getting-started
+    x-displayName: Getting started
+    x-traitTag: true
+    description: |
+      ## Signing up
+      Contact our sales team at sales@salv.com to sign up for service.
+      
+      ## Terms used
+      * **Client** — organisation that is using or intends to use Salv service.
+      * **Client application** — application owned by client. Will probably integrate with this API.
+      * **Person** — natural person or legal entity, one of the customers of the client.
+      * **Transaction** — monetary transaction performed by one of the persons.
+      
+      ## General workflow
+      While the integration process may wary in each case, on average the steps to use the service look as follows:
+      * Upload historical persons and transactions data using 
+      [CSV data upload endpoint](#tag/data-upload/operation/uploadData).
+      * Configure client application to upload new persons and transactions automatically using 
+      [addPerson endpoint](#operation/addPersonV2) and [addTransaction endpoint](#operation/addTransaction).
+      * Configure monitoring, screening and risks. That would include monitoring scenarios, risk rules and a number of 
+      settings for screening. Currently, most of those things can only be configured through Salv UI. However, some of 
+      the configuration is available in open API as well:
+        * [Custom Lists](#tag/custom-list-record)
+      * Salv will produce monitoring alerts, screening alerts and risk levels for provided persons and 
+      transactions based on configuration provided:
+        * [Monitoring alerts](#tag/monitoring-overview) are created according to configured scenarios
+        * [Screening alerts](#tag/screening-overview) are created during Automatic Re-screening and on API calls
+        * [Risks](#tag/risk) are calculated on data updates
+      * In order to receive the data about new screening and monitoring alerts in real time, client would need to 
+      configure [webhooks](#tag/webhooks). Configuring a webhook will cause Salv to notify client application about a 
+      particular event, for example about a creation of a new alert or change of a risk level for any person.
+      
+      Alternatively, all the monitoring alerts, screening alerts and risk levels are available in Salv UI, along with 
+      a lot of features to help manage and organize the process of examining the alerts and risks.
+
+      ## Authentication
+      
+      <!-- ReDoc-Inject: <security-definitions> -->
+
+      ### Authentication flow examples
+      #### With cURL
+      ```
+      $ curl -X POST -u "{clientId}:{clientSecret}" -d "grant_type=client_credentials" "https://app.salv.com/oauth/token"
+      {
+        "access_token": "{yourBearerToken}",
+        "expires_in": 1576799999,
+        "token_type": "Bearer"
+      }
+      ```
+      #### With Python Requests
+      ```
+      import requests
+
+      resp = requests.post('https://app.salv.com/oauth/token', auth=({clientId}, {clientSecret}), data={'grant_type': 'client_credentials'})
+      print(resp.json())
+
+      {
+        "access_token": "{yourBearerToken}",
+        "expires_in": 1576799999,
+        "token_type": "Bearer"
+      }
+      ```
+
+      ## Compatibility
+      - New properties may be added to a representation at any time. Make sure that your API client will ignore any unknown properties.
+      - Removal or alteration of an existing property will be handled through versioning.
+
+      ## Error handling
+      ### Errors 4XX
+      Client errors (400-499) indicate issues with the request that should be fixed before retrying.
+
+      | Status Code | Meaning | Action |
+      |-------------|---------|--------|
+      | 400 Bad Request | Invalid request format or parameters | Check request body and parameters |
+      | 401 Unauthorized | Missing or invalid authentication | Refresh access token and retry |
+      | 403 Forbidden | Insufficient permissions | Check API client permissions |
+      | 404 Not Found | Resource does not exist | Verify resource ID exists |
+      | 409 Conflict | Resource state conflict | Check current state before retrying |
+      | 422 Unprocessable Entity | Entity already exists | Use existing entity or different identifier |
+
+      **Do not retry** 4XX errors without fixing the underlying issue first (except 401 after token refresh).
+
+      ### Errors 5XX
+
+      All requests which return a response with status code 500-599 should be retried after some interval.
+
+      If a retry of a failed request fails again, it should be retried again until it succeeds. Retrying a request that repeatedly fails should be done at increasingly longer interval.
+
+      ### Rate Limiting (429 errors)
+
+      API requests are subject to rate limiting to ensure fair usage and system stability. When you exceed the rate limit,
+      the API returns HTTP status code **429 Too Many Requests**.
+
+      #### Handling rate limits
+
+      When you receive a 429 response:
+      1. Wait before retrying - implement exponential backoff
+      2. Queue requests and process them at a sustainable rate
+      3. Contact support if you need higher limits
+  - name: aml
+    x-displayName: Persons & Transactions
+    description: |
+      This section contains all operations managing the state of persons and transactions.
+      
+      There are three endpoints for creating or modifying a person, make sure to choose the right one for your task:
+      * [Create new person](#tag/aml/operation/addPersonV2) will create a new person if a person with the same ID does not already exist in our system. 
+      * [Patch person](#tag/aml/operation/patchPersonV2) partially updates an existing person if this person exists in the system. A request to this endpoint will only update or add 
+      attributes which are provided in the request. Use this endpoint to update selected 
+      attributes of a person or to add new attributes without changing attributes not present in the request payload. This endpoint may also be used to update person type.
+      * [Update person](#tag/aml/operation/updatePersonV2) updates an existing person if this person exists in the system. A request to this endpoint must contain both person type and attributes. 
+      A request to this endpoint overwrites both person type and attributes with the values given in the request.
+      
+      ID of a person or a transaction is a case-sensitive text field in our system. Salv does not transform the ID in any way. Only the following characters are allowed: Alphanumerics `a-zA-Z0-9`, hyphens `-`, underscores `_`, colons `:`, dots `.`.
+      
+      All requests must use ISO-8601 formatted timestamps. That includes defined fields (e.g. timestamp property in "Create new transaction" request) and custom key-value pairs (e.g. under attributes property in "Create new person" request).
+      
+      For any data passed in person or transaction objects, the keys must adhere to the following rules:  
+      - It must not contain a "**.**"
+      - It must not consist of whitespaces
+
+      ## Example: Uploading person and transaction
+      This example shows how to upload data to use it later for monitoring or screening.
+
+      ### 1. Add a person if not already added
+      Add a new person, according to the documentation at [addPerson(POST)](#operation/addPersonV2).
+
+      If the person has already been added to Salv, then skip this step.
+
+      #### With cURL
+      ```
+      curl --request POST \
+        --url https://app.salv.com/api/v2/persons \
+        --header 'Authorization: Bearer {yourBearerToken}' \
+        --header 'Content-Type: application/json' \
+        --data '{
+        "id": "bbt12345",
+        "type": "INDIVIDUAL",
+        "attributes": {
+          "first_name": "Sheldon",
+          "last_name": "Cooper",
+          "dob": "1983-05-12",
+          "city": "Pasadena",
+          "street_address": "2311 North Los Robles Avenue",
+          "country": "US",
+          "onboarding_date": "2019-04-16",
+          "email": "sheldon.cooper@gmail.com",
+          "phone_number": "+1582693582",
+          "id_document": "passport",
+          "id_country": "US",
+          "gender": "F"
+        }
+      }'
+      ```
+
+      #### With Python Requests
+      ```
+      import requests
+
+      url = "https://app.salv.com/api/v2/persons"
+
+      payload = {
+          "id": "bbt12345",
+          "type": "INDIVIDUAL",
+          "attributes": {
+              "first_name": "Sheldon",
+              "last_name": "Cooper",
+              "dob": "1983-05-12",
+              "city": "Pasadena",
+              "street_address": "2311 North Los Robles Avenue",
+              "country": "US",
+              "onboarding_date": "2019-04-16",
+              "email": "sheldon.cooper@gmail.com",
+              "phone_number": "+1582693582",
+              "id_document": "passport",
+              "id_country": "US",
+              "gender": "F"
+          }
+      }
+      headers = {
+          "Content-Type": "application/json",
+          "Authorization": "{yourBearerToken}"
+      }
+
+      response = requests.request("POST", url, json=payload, headers=headers)
+
+      print(response.text)
+      ```
+      ### 2. Add a transaction
+      Add a new transaction, according to the documentation at [addTransaction(POST)](#operation/addTransaction).
+
+      #### With cURL
+      ```
+      curl --request POST \
+        --url https://app.salv.com/api/v1/persons/bbt12345/transactions \
+        --header 'Authorization: Bearer {yourBearerToken}' \
+        --header 'Content-Type: application/json' \
+        --data '{
+        "id": "aeio-1234567",
+        "attributes": {
+          "sender_name": "Sheldon Cooper",
+          "sender_account": "GB123456789",
+          "receiver_name": "Leonard Hofstadter",
+          "receiver_account": "DE987654321",
+          "amount": "15678.34",
+          "type": "wire_transfer",
+          "direction": "I",
+          "timestamp": "2022-01-20T08:48:39.000Z"
+        }
+      }'
+      ```
+
+      #### With Python Requests
+      ```
+      import requests
+
+      url = "https://app.salv.com/api/v1/persons/bbt12345/transactions"
+
+      payload = {
+          "id": "aeio-1234567",
+          "attributes": {
+              "sender_name": "Sheldon Cooper",
+              "sender_account": "GB123456789",
+              "receiver_name": "Leonard Hofstadter",
+              "receiver_account": "DE987654321",
+              "amount": "15678.34",
+              "type": "wire_transfer",
+              "direction": "I",
+              "timestamp": "2022-01-20T08:48:39.000Z"
+          }
+      }
+      headers = {
+          "Content-Type": "application/json",
+          "Authorization": "{yourBearerToken}"
+      }
+
+      response = requests.request("POST", url, json=payload, headers=headers)
+
+      print(response.text)
+      ```
+  - name: monitoring-checks
+    description: |
+      Person & Transaction monitoring.
+      
+      Real-time (ONLINE) scenarios should be used when an alert created by the scenario should block the transaction. [Example: Real-time (pre-processing) transaction monitoring](#tag/monitoring-overview/Example:-Real-time-(pre-processing)-transaction-monitoring)
+
+      Post-event (OFFLINE) scenarios should be used when an alert created should NOT block the transaction. [Example: Simple integration](#tag/aml/Example:-Uploading-person-and-transaction)
+
+      In the rare occasion that a monitoring check fails with error code 500, the transaction should be blocked. In that case Salv has not been able to verify that the transaction is safe to process.
+    x-displayName: Monitoring checks
+  - name: screening-checks
+    description: Screening checks for transaction and person.
+    x-displayName: Screening checks
+  - name: note
+    x-displayName: Notes
+  - name: screening-searches
+    description: Screening search can be used to check any name against screening lists without first uploading a person or a transaction.
+    x-displayName: Screening search
+  - name: screening-list-groups
+    description: Screening selectors can be used in screening search. These can be used in [Screening search](#tag/screening-searches/operation/search)
+    x-displayName: Screening selectors
+  - name: risk
+    description: |
+      Risks levels are assigned to persons according to configured risk rules. It is up to client how
+      to interpret each particular level.
+      
+      Risk rules are configured in Salv UI.
+      
+      Person risk is scored every time one of the following triggering events occurs:
+      - the person is created
+      - the person is updated
+      - a transaction is added to the person
+      - a monitoring alert is created for the person
+      - the status of a monitoring alert of the person is updated
+      - the status of a screening alert of the person is changed to any true positive status
+      - the status of a screening alert of the person is changed from any of true positive statuses to non true positive status
+      
+      Person risk scoring happens in the background and the service does not guarantee any time frame for it.
+      
+      Risk levels can be overridden by client operators for any particular person. They would need to choose one 
+      of the preconfigured override reasons, which are also configured in Salv UI.
+    x-displayName: Risks
+  - name: alert
+    x-displayName: Monitoring alerts
+  - name: unresolved-alerts
+    description: Endpoints to check if given entity has anything unresolved
+    x-displayName: Unresolved alerts
+  - name: custom-list-record
+    description: |
+      Endpoints to add, update, delete and get custom list records.
+      
+      Custom Lists can be used in two ways:
+      - Custom Lists can be used to screen persons and transactions against them in the same way it works for Dow Jones
+      lists. For example, if a client has some in-house black list, it can be added to screening as custom list.
+      - Custom Lists can be referenced in monitoring scenarios. For example, a scenario may trigger when the transaction
+      amount is higher than some threshold and the recipient country is in custom list of high risk countries.
+    x-displayName: Custom Lists
+  - name: custom-list-usable-field-public
+    description: Custom list usable fields can be used in [Screening search](#tag/screening-searches/operation/search)
+    x-displayName: Custom List usable fields
+  - name: webhooks
+    x-displayName: Webhooks
+    x-traitTag: true
+    description: |
+      
+      ### Setting up
+      
+      You can set up webhook configuration on the [webhooks](https://app.salv.com/webhooks) page.  
+      
+      Please note that you must have an **administrator** role.
+      
+      ### Webhook retry mechanism
+      
+      If sending the webhook fails, we'll retry sending it until it is accepted. Retry attempts happen regularly for up to 7 days, at increasing time intervals:
+      - 2 minutes
+      - 5 minutes
+      - 10 minutes
+      - 15 minutes
+      - 30 minutes
+      - 1 hour
+      - 2 hours
+      - 4 hours
+
+      After that, retries happen every 8 hours for the following 7 days. For tackling transient errors (like a momentary network glitch) we retry every request 3 times with 1 second interval.
+      
+      The timeout limit for webhooks is 1 second for connect and 9 seconds for read timeout.
+      
+      ### Webhook triggers
+      
+      Salv supports sending out certain webhooks based on the following event triggers:
+      - __Trigger__ -> __Supported Actions__
+      - `ALERT` -> `ALERT_CREATED`
+      - `ALERT_STATUS`  -> `ALERT_STATUS_UPDATED`
+      - `SCREENING_ALERT` -> `SCREENING_ALERT_CREATED`
+      - `SCREENING_ALERT_STATUS` -> `SCREENING_ALERT_STATUS_UPDATED`
+      - `SCREENING_ALERT_UPDATE` -> `SCREENING_ALERT_UPDATED`
+      - `FINAL_RISK` -> `FINAL_RISK_UPDATED`
+      - `PERSON_STATUS` -> `PERSON_STATUS_UPDATED`
+      - `PERSON` -> The name of the succeeding decision rule. Example: `PERSON_CLEARED`
+      - `TRANSACTION` -> The name of the succeeding decision rule. Example: `TRANSACTION_CLEARED`
+      - `CUSTOM_LIST_RECORD` -> `CUSTOM_LIST_RECORD_CREATED`, `CUSTOM_LIST_RECORD_UPDATED`, `CUSTOM_LIST_RECORD_ARCHIVED`
+      - `MANUAL_ALERT` -> `MANUAL_ALERT_CREATED`
+      - `MANUAL_ALERT_STATUS` -> `MANUAL_ALERT_STATUS_UPDATED`
+
+      ### Decision webhook
+      
+      When configuring decision webhook rules, every time an alert related to a person or a transaction is changed, this set of rules will be run on all the related alerts for that person/transaction.  
+      If any of the rules succeeds, it will send out a webhook with the name of that rule in action parameter. For more information, check Salv user manual.
+
+      <SchemaDefinition schemaRef="#/components/schemas/WebhookEvent" />
+  - name: data-upload
+    x-displayName: Data upload from CSV
+    description: |
+      ## Steps to upload data using CSV
+      1. Format the  csv file and add all the mandatory data fields indicated in the  [User Manual](https://help.salv.com/en/articles/154650-data-overview)
+
+      2. Upload the [csv file via API](#tag/data-upload/operation/uploadData).  Note: the upload API response contains the id that will to be used in status check API call (step 3). 
+      When a data file has been successfully uploaded, an HTTP response with 202 status code is returned. A response with 202 status code indicates that the file has been uploaded successfully and the system will try to process the data. It does not guarantee that data will be successfully processed.
+
+            What will happen next?
+            1.  First comes the **validation phase**: 
+                1. If the Schemas are added in the UI, then our system will validate the file against the schemas (e.g. if there is a field added with DATE type, then system will validate if the date format is correct)
+                2. If no Schemas are added in the UI, then our system will consider all fields as STRING
+      
+                Note: during this validation phase we do not check if the transaction has been added to the system before. 
+      
+                3. If there are any errors, then no data will be uploaded. In this case calling [check status API call](#tag/data-upload/operation/getDataUploadStatus) will return FAILED status and a error message for the the first error encountered. The error message will be in the `reason` field in a human readable text. 
+                4. If there are no errors, then the upload phase starts.
+      
+            2. Second (if no errors occurred) comes the **upload phase**: our system will start uploading and saving data in batches of 1000, and in case of transaction file will check for duplicates and if the person is present in the system.  
+                1. If no errors occur, then the file is uploaded successfully.
+                2. If an error occurs, then when step no 3 ([check status API call](#tag/data-upload/operation/getDataUploadStatus)) is done, then: 
+                    1. system will show the first error and give the id of the person or transaction that caused the error. 
+                    2. system will show the id of the last uploaded person or transaction and the id of the first person or transaction that was not uploaded.
+      
+                    and, 
+      
+                    3. the data following the last uploaded person or transaction will not be uploaded. 
+            - Example:
+      
+              > Csv file has 200 000 rows. There is a duplicate id on row 87 456.  In **validation phase** duplicate errors are not checked thus the file will move on to the **upload phase**. First 87 000 rows are uploaded without any errors. Rows starting from 87 001 will not get uploaded because there is a duplicate error in the batch (the patch of 1000 that gets checked). System will show that there is a duplicate, will show the id of the duplicate Person or Transaction and will show the last uploaded Person or Transaction id and the last id that was not added. 
+      
+              Example of an **upload phase** error message:
+      
+              ```jsx
+              {
+                  "status": "PARTIALLY_COMPLETED",
+                  "reason": "The upload appears to contain transactions (id ameio-1234567) that have already been added to Salv. Please make sure that your upload does not contain any duplicates or transactions that have already been added to Salv. The first transaction not added to Salv with this upload has id fmeio-1234567. Last processed and saved row was with id: dseio-1234567"
+              }
+              ```
+
+      3. In order to check the status of the file upload either use [get status of data upload API call](#tag/data-upload/operation/getDataUploadStatus) or check Data upload page on app.salv.com. This will provide the status and any further information about the errors.
+  - name: monitoring-overview
+    x-displayName: Monitoring overview
+    x-traitTag: true
+    description: |
+      Monitoring allows clients to run various checks (called scenarios) against their persons and transactions.
+      There are three scenario types:
+      - **Real-time** (ONLINE) scenarios are run by client by calling real-time checks endpoints. Those are intended to be used for the 
+      real time checks, for example to decide whether or not to suspend a transaction.
+      - **Post-event** (OFFLINE) scenarios are run by Salv. Person post-event scenarios are run when person is created or updated, 
+      transaction post-event scenarios are only run on transaction creation.
+      - **Periodic** scenarios are run by Salv according to specified schedule.
+      
+      All those scenarios are configured in Salv UI. For each pair of triggered scenario and person/transaction one 
+      monitoring alert is created. Those alerts are stored by Salv and can later be accessed in UI or by API.
+      
+      ## Example: Real-time (pre-processing) transaction monitoring
+      Transaction monitoring runs all real-time (ONLINE) monitoring scenarios and returns response in realtime. This flow can be used to block a transaction based on transaction monitoring checks.
+
+      ### 1. Add a person (if not already added) and a transaction
+      Add a person and a transaction as shown in [Example: Uploading person and transaction](#tag/aml/Example:-Uploading-person-and-transaction).
+
+      ### 2. Perform monitoring check
+      Perform transaction monitoring according to the documentation at [runTransactionMonitoringChecks(POST)](#operation/runTransactionMonitoringChecks).
+
+      #### With cURL
+      ```
+      curl --request POST \
+        --url https://app.salv.com/api/v1/transactions/transactionId/monitoring-checks \
+        --header 'Authorization: Bearer {yourBearerToken}' \
+        --header 'Content-Type: application/json'
+      ```
+      #### With Python Requests
+      ```
+      import requests
+
+      url = "https://app.salv.com/api/v1/transactions/transactionId/monitoring-checks"
+
+      headers = {
+          "Content-Type": "application/json",
+          "Authorization": "{yourBearerToken}"
+      }
+
+      response = requests.request("POST", url, headers=headers)
+
+      print(response.text)
+      ```
+      #### API response when an alert was created
+      In this case you should block the transaction using your internal logic.
+      ```
+      {
+        "results": [
+          {
+            "reason": "High incoming sum",
+            "details": "Sum >= 5 000€ (Sum: 19 694.05) in last 30 days",
+            "score": 100,
+            "weight": 1,
+            "scenarioType": "ONLINE",
+            "alertId": 321
+          },
+          {
+            "reason": "Outgoing transfer is 80% of the total balance",
+            "details": "Amount: 7785.0, balance: 9693.43",
+            "score": 100,
+            "weight": 1,
+            "scenarioType": "ONLINE",
+            "alertId": 543
+          }
+        ]
+      }
+      ```
+      #### API response when no alert was created
+      In this case you should process the transaction as no alert was created.
+      ```
+      {
+        "results": []
+      }
+      ```
+      
+      ## Decision lifecycle
+
+      <img src="https://docs.salv.com/api/flow.jpg" alt="Data flow diagram">
+  - name: screening-overview
+    x-displayName: Screening overview
+    x-traitTag: true
+    description: |
+      **Screening** allows clients to check their persons and transactions against screening lists, such as sanctions lists,
+      PEPs (politically exposed persons) lists and adverse media lists. It is also possible to configure **custom lists** to
+      check persons and transactions against them as well.
+      
+      There are two ways to use screening. 
+      
+      - To quickly check some name against the screening lists without uploading any data or creating alerts use 
+      [screening search endpoint](#tag/screening-searches/operation/search).
+      
+      - To configure more intricate checks first upload person and transaction data to Salv. That will enable automatic 
+      person re-screening and allow you to configure a lot of screening details. Then it will be possible to run screening 
+      with all that configuration for any particular person or transaction using [the API](#tag/screening-checks).
+
+      #### Screening settings that can be configured in Salv IU
+      - Clearance rules
+      - Fields to screen
+      - Significant Update Indicators
+      - Transaction Goodlist Identifiers
+      - Person and Transaction Segments
+      - Automatic Re-screening
+      - Dow Jones lists to screen against
+      - Custom Lists to screen against
+      - Fuzzy matching threshold
+      - BIC Length Threshold
+      
+      ## Example: Transaction screening
+      Transaction screening checks transaction sender and recipient names against screening lists
+
+      ### 1. Add a transaction
+      Add a new transaction, according to the documentation at [addTransaction(POST)](#operation/addTransaction).
+
+      ### 2. Perform screening check
+      Perform transaction screening according to the documentation at [checkTransaction(POST)](#operation/checkTransaction).
+
+      #### With cURL
+      ```
+      curl -X POST \
+        https://app.salv.com/api/v1/transactions/000000000000009/screening-checks \
+        -H 'Authorization: Bearer {yourBearerToken}' \
+        -H 'Content-Type: application/json'
+      ```
+      #### With Python Requests
+      ```
+      import requests
+
+      url = "https://app.salv.com/api/v1/transactions/id/screening-checks"
+
+      headers = {
+          "Content-Type": "application/json",
+          "Authorization": "{yourBearerToken}"
+      }
+
+      response = requests.request("POST", url, headers=headers)
+
+      print(response.text)
+      ```
+      #### API response when an alert was created
+      In this case you should block the transaction using your internal logic.
+      ```
+      {
+        "matches": [
+          {
+            "flowId": "b09ab27c-2581-4833-9c90-62a51f078f60",
+            "inputData": "Hassan Bahadlri",
+            "matchData": "{"id": "67c79e6f14245df0791a307154512e8a097d6a57", "schema": "Person", "properties": {"name": ["Hassan Bahadori"], "lastName": ["Bahadori"], "firstName": ["Hassan"]}}",
+            "sanctionList": "US OFAC sanctions",
+            "score": 99,
+            "checkType": "SANCTION",
+            "alertId": 321
+            "referenceGroupCodes": ["EUCON", "OFACAIS"]
+          },
+          {
+            "flowId": "96aafb73-17ec-43c4-a9d8-83bf0785f9cf",
+            "inputData": "Gazprom Neft",
+            "matchData": "{"id": "303a2ec82f2c5c48e051bfd7e3822baba5b9ca06", "schema": "LegalEntity", "properties": {"name": ["Gazprom Neft"]}}",
+            "sanctionList": "CH SECO sanctions",
+            "score": 100,
+            "checkType": "SANCTION"
+            "alertId": 123,
+            "referenceGroupCodes": null
+          }
+        ]
+      }
+      ```
+      #### API response when no alert was created
+      In this case you should process the transaction as no alert was created.
+      ```
+      {
+        "matches": []
+      }
+      ```
+      ## Example: Person screening
+      Person screening checks person name against screening lists
+
+      ### 1. Add a person if not already added
+      Add a new person, according to the documentation at [addPerson(POST)](#operation/addPersonV2).
+
+      If the person has already been added to Salv, then skip this step.
+
+      ### 2. Perform screening check
+      Perform person screening according to the documentation at [checkPerson(POST)](#operation/checkPerson).
+
+      #### With cURL
+      ```
+      curl -X POST \
+        https://app.salv.com/api/v1/persons/000007/screening-checks \
+        -H 'Authorization: Bearer {yourBearerToken}' \
+        -H 'Content-Type: application/json'
+      ```
+      #### With Python Requests
+      ```
+      import requests
+
+      url = "https://app.salv.com/api/v1/persons/id/screening-checks"
+
+      headers = {
+          "Content-Type": "application/json",
+          "Authorization": "{yourBearerToken}"
+      }
+
+      response = requests.request("POST", url, headers=headers)
+
+      print(response.text)
+      ```
+      #### API response when an alert was created
+      ```
+      {
+        "matches": [
+          {
+            "flowId": "b09ab27c-2581-4833-9c90-62a51f078f60",
+            "inputData": "Hassan Bahadlri",
+            "matchData": "{"id": "67c79e6f14245df0791a307154512e8a097d6a57", "schema": "Person", "properties": {"name": ["Hassan Bahadori"], "lastName": ["Bahadori"], "firstName": ["Hassan"]}}",
+            "sanctionList": "US OFAC sanctions",
+            "score": 99,
+            "checkType": "SANCTION",
+            "alertId": 321
+            "referenceGroupCodes": ["EUCON", "OFACAIS"]
+          },
+          {
+            "flowId": "96aafb73-17ec-43c4-a9d8-83bf0785f9cf",
+            "inputData": "Hassan Bahadlri",
+            "matchData": "{"id": "303a2ec82f2c5c48e051bfd7e3822baba5b9ca06", "schema": "Person", "properties": {"name": ["Hassan Bahadlri"], "wikidataId": ["Q85387153231"]}, "organizations": []}",
+            "sanctionList": "PEP every politician",
+            "score": 100,
+            "checkType": "PEP",
+            "alertId": 123,
+            "referenceGroupCodes": null
+          }
+        ]
+      }
+      ```
+      #### API response when no alert was created
+      ```
+      {
+        "matches": []
+      }
+      ```
+  - name: screening-alerts
+    description: Screening alert is created when a particular field of a particular person matches against one of the screening lists. Screening alert has a list of hits, each of which represent one matched record from screening list. Some of the hits can be cleared automatically according to the configured clearance rules and goodlists.
+    x-displayName: Screening alerts
+  - name: alerts
+    description: |
+      Salv has multiple properties that are associated with individual alerts and influence alert management process based on their assignment. Using the initial alert ID and TYPE that are generated after different checks are triggered and communicated via API or WEBHOOKS, it is possible to programmatically modify these properties to streamline your business logic.
+      
+      **Attention:** To start using this API, the client id used for authentication needs to be created **after 16.05.2023**. If your integration currently uses credentials created before this date, you must create a NEW credentials pair, and replace the existing one.
+    x-displayName: Alerts
+  - name: manual-alerts
+    description: |
+      Manual alerts allow compliance officers to create alerts manually for persons or transactions that require investigation
+      outside of automated monitoring and screening processes. These alerts can be used to flag suspicious activity identified
+      through external sources, customer complaints, or other manual review processes.
+
+      Manual alerts support the same status workflow as other alert types and can be integrated into existing case management processes.
+    x-displayName: Manual Alerts
+x-tagGroups:
+  - name: General
+    tags:
+      - changelog
+      - getting-started
+      - data-upload
+      - aml
+      - note
+      - webhooks
+      - custom-list-record
+      - custom-list-usable-field-public
+  - name: Monitoring
+    tags:
+      - monitoring-overview
+      - monitoring-checks
+      - alert
+  - name: Screening
+    tags:
+      - screening-overview
+      - screening-checks
+      - screening-searches
+      - screening-list-groups
+      - screening-alerts
+  - name: Risks
+    tags:
+      - risk
+  - name: Alert management
+    tags:
+      - alerts
+      - manual-alerts
+  - name: Deprecated
+    tags:
+      - unresolved-alerts
+
+paths:
+  /v2/persons:
+    post:
+      tags:
+        - aml
+      summary: Create new person
+      description: Attributes supported maximum nesting depth is 2.
+      operationId: addPersonV2
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X POST "https://app.salv.com/api/v2/persons" \
+              -H "Authorization: Bearer $ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "id": "person-123",
+                "type": "INDIVIDUAL",
+                "attributes": {
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "dob": "1990-01-15",
+                  "country": "US"
+                }
+              }'
+        - lang: Python
+          source: |
+            import requests
+
+            response = requests.post(
+                "https://app.salv.com/api/v2/persons",
+                headers={"Authorization": f"Bearer {access_token}"},
+                json={
+                    "id": "person-123",
+                    "type": "INDIVIDUAL",
+                    "attributes": {
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "dob": "1990-01-15",
+                        "country": "US"
+                    }
+                }
+            )
+        - lang: JavaScript
+          label: Node.js
+          source: |
+            const response = await fetch("https://app.salv.com/api/v2/persons", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                id: "person-123",
+                type: "INDIVIDUAL",
+                attributes: {
+                  first_name: "John",
+                  last_name: "Doe",
+                  dob: "1990-01-15",
+                  country: "US"
+                }
+              })
+            });
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiCreatePersonV2'
+            examples:
+              Individual:
+                value:
+                  id: bbt12345
+                  type: INDIVIDUAL
+                  attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "onboarding_date": "2019-04-16T11:10:55.123456Z", "email": "sheldon.cooper@gmail.com", "phone_number": "+1582693582", "id_document": "passport", "id_country": "US", "gender": "F" }
+              Individual_with_nested_attributes:
+                value:
+                  id: "bbt12345"
+                  type: "INDIVIDUAL"
+                  attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "onboarding_date": "2019-04-16T11:10:55.123456Z", "email": "sheldon.cooper@gmail.com", "phone_number": "+1582693582", "id_document": "passport", "id_country": "US", "gender": "F", "contracts": [ { "id": 1, "loan_type": "loan_agreement", "status": "active", "start_date": "2022-01-20T08:48:39Z" }, { "id": 2, "loan_type": "lease", "status": "inactive", "start_date": "2020-01-20T08:48:39Z", "end_date": "2022-01-20T08:48:39Z" } ] }
+              Legal:
+                value:
+                  id: bbt12346
+                  type: LEGAL
+                  attributes: { "company_name": "The Cheesecake factory", "onboarding_date": "2020-06-12T11:10:55.123456Z", "country": "FR", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "email": "info@cheescakefactory.com", "phone_number": "+1472583692", "industry": "restaurant", "business_reg_number": "12-3456789", "expected_monthly_turnover": "100000" }
+              Legal_with_nested_attributes:
+                value:
+                  id: bbt12347
+                  type: LEGAL
+                  attributes: { "company_name": "Footprints on the Moon", "onboarding_date": "2021-05-24T11:10:55.123456Z", "country": "CA", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "email": "footprintsonthemoon@gmail.com", "phone_number": "+1582472952", "industry": "entertainment", "shareholders": [
+                    {
+                      "id": "shrhldr-1",
+                      "first_name": "Howard",
+                      "last_name": "Wolowitz",
+                      "dob": "1988-07-06",
+                      "citizenship": "IL"
+                    },
+                    {
+                      "id": "shrhldr-2",
+                      "first_name": "Raj",
+                      "last_name": "Koothrappali",
+                      "dob": "1989-05-06",
+                      "citizenship": "IN"
+                    },
+                    {
+                      "id": "shrhldr-3",
+                      "company_name": "BIG Invest LLC",
+                      "country": "GB"
+                    }
+                  ],            "business_reg_number": "98-7654321", "expected_monthly_turnover": "10000" }
+      responses:
+        '200':
+          description: Created person
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '422':
+          description: Person exists
+  /v2/persons/search:
+    post:
+      tags:
+        - aml
+      summary: Fetch all persons
+      operationId: findAllPersons
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiPersonSearchQuery'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/PersonsPage'
+  /v2/persons/{personId}:
+    patch:
+      tags:
+        - aml
+      summary: Patch person
+      description: |
+        Partial person update. Only attributes present in request will be added/updated. Attributes supported maximum
+        nesting depth is 2.
+
+        This endpoint also supports optional person type update.
+
+        In case the operation is successful there will be an empty response.
+
+        ### Examples
+        #### cURL
+        ```
+        $ curl --request PATCH \
+          --url https://app.salv.com/api/v2/persons/{personId} \
+          --header 'Authorization: Bearer {yourBearerToken}' \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "type": "LEGAL",
+            "attributes": {
+              "company_name": "Best Vacuum Cleaning Ltd."
+            }
+          }'
+        ```
+
+        #### With Python Requests
+        ```
+        import requests
+
+        payload = {
+          "attributes": {
+            "phone_number": "(198)747-8241x9209",
+            "shareholders": [{
+              "id": 1,
+              "name": "Rose Doe",
+              "dob": "1970-01-01",
+              "email": "rose.doe@gmail.com"
+            }]
+          }
+        }
+
+        response = requests.post(
+           'https://app.salv.com/api/v2/persons/{personId}',
+           auth = ({clientId}, {clientSecret}),
+           json = payload)
+
+        response.raise_for_status()
+        ```
+      operationId: patchPersonV2
+      parameters:
+        - name: personId
+          in: path
+          description: External unique person ID
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiPatchPersonV2'
+            examples:
+              Individual:
+                value:
+                  attributes: { "last_name": "Doe", "dob": "1970-01-01" }
+              Legal:
+                value:
+                  attributes: { "phone_number": "(198)747-8241x9209",
+                                "shareholders": [ { "id": 1, "name": "Rose Doe", "dob": "1970-01-01", "email": "rose.doe@gmail.com" } ]
+                  }
+              TypeChange:
+                value:
+                  type: "LEGAL"
+                  attributes: { "companyName": "Very Good Vacuum Cleaning Ltd." }
+      responses:
+        '200':
+          description: Successfully updated person
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Person not found
+    put:
+      tags:
+        - aml
+      summary: Update person
+      description: |
+        Person update. Attributes in the request will be used to replace existing ones and type will be updated. 
+        Attributes supported maximum nesting depth is 2.
+        
+        In case the operation is successful there will be an empty response.
+
+        ### Examples
+        #### cURL
+        ```
+        $ curl --request PUT \
+          --url https://app.salv.com/api/v2/persons/{personId} \
+          --header 'Authorization: Bearer {yourBearerToken}' \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "type": "LEGAL",
+            "attributes": {
+              "company_name": "Best Vacuum Cleaning Ltd."
+            }
+          }'
+        ```
+
+        #### With Python Requests
+        ```
+        import requests
+
+        payload = {
+          "type": "INDIVIDUAL",
+          "attributes": {
+            "phone_number": "(198)747-8241x9209",
+            "shareholders": [{
+              "id": 1,
+              "name": "Rose Doe",
+              "dob": "1970-01-01",
+              "email": "rose.doe@gmail.com"
+            }]
+          }
+        }
+
+        response = requests.post(
+           'https://app.salv.com/api/v2/persons/{personId}',
+           auth = ({clientId}, {clientSecret}),
+           json = payload)
+
+        response.raise_for_status()
+        ```
+      operationId: updatePersonV2
+      parameters:
+        - name: personId
+          in: path
+          description: External unique person ID
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiUpdatePersonV2'
+            examples:
+              Individual:
+                value:
+                  type: "INDIVIDUAL"
+                  attributes: { "last_name": "Doe", "dob": "1970-01-01" }
+              Legal:
+                value:
+                  type: "LEGAL"
+                  attributes: { "phone_number": "(198)747-8241x9209",
+                                "shareholders": [ { "id": 1, "name": "Rose Doe", "dob": "1970-01-01", "email": "rose.doe@gmail.com" } ]
+                  }
+      responses:
+        '200':
+          description: Updated person
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Person not found
+  /v1/persons:
+    get:
+      deprecated: true
+      tags:
+        - aml
+      summary: Fetch all persons
+      operationId: findAllPersonsDeprecated
+      description: NB! If there are more than 10000 results then the API shows the number of total results as 10000 and you can't paginate past the 10000th result.
+      parameters:
+        - $ref: 'models.yaml#/components/parameters/pageParam'
+        - $ref: 'models.yaml#/components/parameters/sizeParam'
+        - $ref: 'models.yaml#/components/parameters/queryParam'
+        - name: attribute
+          in: query
+          description: Search query attribute
+          required: false
+          schema:
+            type: string
+            minLength: 1
+        - name: category
+          in: query
+          description: Person category
+          required: false
+          schema:
+            type: string
+            enum:
+              - COUNTERPARTY
+              - CUSTOMER
+        - $ref: 'models.yaml#/components/parameters/orderByParam'
+        - $ref: 'models.yaml#/components/parameters/orderDirectionParam'
+        - $ref: 'models.yaml#/components/parameters/searchOperator'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/PersonsPage'
+              examples:
+                result:
+                  value:
+                    number: 0
+                    size: 20
+                    total: 1
+                    content: [
+                      {
+                        "id": "bbt12345",
+                        "type": "INDIVIDUAL",
+                        "attributes": { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "onboarding_date": "2019-04-16", "email": "sheldon.cooper@gmail.com", "phone_number": "+1582693582", "id_document": "passport", "id_country": "US", "gender": "F" },
+                        "status": "NEW",
+                        "createdTime": "2019-08-24T14:15:22Z",
+                        "snoozeConfiguration": {
+                          "id": 1,
+                          "personId": 1,
+                          "createdBy": {
+                            "id": 1,
+                            "email": "dana.aml@starbank.com",
+                            "name": "Dana Cummings"
+                          },
+                          "createdTime": "2019-08-24T14:15:22Z",
+                          "endTime": "2019-08-24T14:15:22Z",
+                          "amount": 0,
+                          "totalAmount": 0,
+                          "note": { }
+                        },
+                        "category": "CUSTOMER"
+                      }
+                    ]
+    post:
+      tags:
+        - aml
+      summary: Create new person (v1)
+      description: Use [Create new person v2](#tag/aml/operation/addPersonV2) instead.
+      operationId: addPerson
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            examples:
+              Individual:
+                value:
+                  id: bbt12345
+                  type: INDIVIDUAL
+                  attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "onboarding_date": "2019-04-16T11:10:55.123456Z", "email": "sheldon.cooper@gmail.com", "phone_number": "+1582693582", "id_document": "passport", "id_country": "US", "gender": "F" }
+              Legal:
+                value:
+                  id: bbt12346
+                  type: LEGAL
+                  attributes: { "company_name": "The Cheesecake factory", "onboarding_date": "2020-06-12T11:10:55.123456Z", "country": "FR", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "email": "info@cheescakefactory.com", "phone_number": "+1472583692", "industry": "restaurant", "business_reg_number": "12-3456789", "expected_monthly_turnover": "100000" }
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiCreatePerson'
+      responses:
+        '200':
+          description: Created person
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiPerson'
+              examples:
+                Individual:
+                  value:
+                    id: bbt12345
+                    type: INDIVIDUAL
+                    attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "onboarding_date": "2019-04-16", "email": "sheldon.cooper@gmail.com", "phone_number": "+1582693582", "id_document": "passport", "id_country": "US", "gender": "F" }
+                Legal:
+                  value:
+                    id: bbt12346
+                    type: LEGAL
+                    attributes: { "company_name": "The Cheesecake factory", "onboarding_date": "2020-06-12", "country": "FR", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "email": "info@cheescakefactory.com", "phone_number": "+1472583692", "industry": "restaurant", "business_reg_number": "12-3456789", "expected_monthly_turnover": "100000" }
+        '400':
+          description: Bad request
+          content:
+            application/text:
+              schema:
+                type: string
+                description: Error message
+        '401':
+          description: Unauthorized
+          content:
+            application/text:
+              schema:
+                type: string
+                description: Error message
+        '422':
+          description: Person exists
+          content:
+            application/text:
+              schema:
+                type: string
+                description: Error message
+  /v1/persons/{personId}:
+    get:
+      tags:
+        - aml
+      summary: Fetch person by id
+      operationId: findPersonById
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X GET "https://app.salv.com/api/v1/persons/bbt12345" \
+              -H "Authorization: Bearer $ACCESS_TOKEN"
+        - lang: Python
+          source: |
+            import requests
+
+            person_id = "bbt12345"
+            response = requests.get(
+                f"https://app.salv.com/api/v1/persons/{person_id}",
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
+            person = response.json()
+        - lang: JavaScript
+          label: Node.js
+          source: |
+            const personId = "bbt12345";
+            const response = await fetch(
+              `https://app.salv.com/api/v1/persons/${personId}`,
+              {
+                headers: { "Authorization": `Bearer ${accessToken}` }
+              }
+            );
+            const person = await response.json();
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person to return
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiPerson'
+              examples:
+                Individual:
+                  value:
+                    id: "bbt12345"
+                    type: "INDIVIDUAL"
+                    attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "onboarding_date": "2019-04-16", "email": "sheldon.cooper@gmail.com", "phone_number": "+1582693582", "id_document": "passport", "id_country": "US", "gender": "F" }
+                    status: "NEW"
+                    createdTime: "2019-08-24T14:15:22Z"
+                    snoozeConfiguration: {
+                      "id": 1,
+                      "personId": 1,
+                      "createdBy": {
+                        "id": 1,
+                        "email": "dana.aml@starbank.com",
+                        "name": "Dana Cummings"
+                      },
+                      "createdTime": "2019-08-24T14:15:22Z",
+                      "endTime": "2019-08-24T14:15:22Z",
+                      "amount": 0,
+                      "totalAmount": 0,
+                      "note": { }
+                    }
+                    category: "CUSTOMER"
+                Individual_with_nested_attributes:
+                  value:
+                    id: "bbt12345"
+                    type: "INDIVIDUAL"
+                    attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "onboarding_date": "2019-04-16", "email": "sheldon.cooper@gmail.com", "phone_number": "+1582693582", "id_document": "passport", "id_country": "US", "gender": "F", "contracts": [ { "id": 1, "loan_type": "loan_agreement", "status": "active", "start_date": "2022-01-20T08:48:39Z" }, { "id": 2, "loan_type": "lease", "status": "inactive", "start_date": "2020-01-20T08:48:39Z", "end_date": "2022-01-20T08:48:39Z" } ] }
+                    status: "NEW"
+                    createdTime: "2019-08-24T14:15:22Z"
+                    snoozeConfiguration: {
+                      "id": 1,
+                      "personId": 1,
+                      "createdBy": {
+                        "id": 1,
+                        "email": "dana.aml@starbank.com",
+                        "name": "Dana Cummings"
+                      },
+                      "createdTime": "2019-08-24T14:15:22Z",
+                      "endTime": "2019-08-24T14:15:22Z",
+                      "amount": 0,
+                      "totalAmount": 0,
+                      "note": { }
+                    }
+                    category: "CUSTOMER"
+                Legal:
+                  value:
+                    id: "bbt12346"
+                    type: "LEGAL"
+                    attributes: { "company_name": "The Cheesecake factory", "onboarding_date": "2020-06-12", "country": "FR", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "email": "info@cheescakefactory.com", "phone_number": "+1472583692", "industry": "restaurant", "business_reg_number": "12-3456789", "expected_monthly_turnover": "100000" }
+                    status: "NEW"
+                    createdTime: "2019-08-24T14:15:22Z"
+                    snoozeConfiguration: {
+                      "id": 1,
+                      "personId": 1,
+                      "createdBy": {
+                        "id": 1,
+                        "email": "dana.aml@starbank.com",
+                        "name": "Dana Cummings"
+                      },
+                      "createdTime": "2019-08-24T14:15:22Z",
+                      "endTime": "2019-08-24T14:15:22Z",
+                      "amount": 0,
+                      "totalAmount": 0,
+                      "note": { }
+                    }
+                    category: "CUST0MER"
+                Legal_with_nested_attributes:
+                  value:
+                    id: "bbt12347"
+                    type: "LEGAL"
+                    attributes: { "company_name": "Footprints on the Moon", "onboarding_date": "2021-05-24", "country": "CA", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "email": "footprintsonthemoon@gmail.com", "phone_number": "+1582472952", "industry": "entertainment", "shareholders": [
+                      {
+                        "id": "shrhldr-1",
+                        "first_name": "Howard",
+                        "last_name": "Wolowitz",
+                        "dob": "1988-07-06",
+                        "citizenship": "IL"
+                      },
+                      {
+                        "id": "shrhldr-2",
+                        "first_name": "Raj",
+                        "last_name": "Koothrappali",
+                        "dob": "1989-05-06",
+                        "citizenship": "IN"
+                      },
+                      {
+                        "id": "shrhldr-3",
+                        "company_name": "BIG Invest LLC",
+                        "country": "GB"
+                      }
+                    ],            "business_reg_number": "98-7654321", "expected_monthly_turnover": "10000" }
+                    status: "NEW"
+                    createdTime: "2019-08-24T14:15:22Z"
+                    snoozeConfiguration: {
+                      "id": 1,
+                      "personId": 1,
+                      "createdBy": {
+                        "id": 1,
+                        "email": "dana.aml@starbank.com",
+                        "name": "Dana Cummings"
+                      },
+                      "createdTime": "2019-08-24T14:15:22Z",
+                      "endTime": "2019-08-24T14:15:22Z",
+                      "amount": 0,
+                      "totalAmount": 0,
+                      "note": { }
+                    }
+                    category: "CUSTOMER"
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Person not found
+    patch:
+      tags:
+        - aml
+      summary: Patch person (v1)
+      description: Use [Patch person v2](#tag/aml/operation/patchPersonV2) instead.
+      operationId: updatePerson
+      deprecated: true
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person to return
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiPerson'
+      responses:
+        '200':
+          description: Updated person
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiPerson'
+        '400':
+          description: Invalid input
+  /v1/persons/{personId}/notes:
+    post:
+      tags:
+        - note
+      summary: Creates new note
+      operationId: addPersonNote
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiPersonNote'
+            examples:
+              Note:
+                value:
+                  content: "Note about a person"
+      responses:
+        '200':
+          description: Created note
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiPersonNote'
+              examples:
+                Note:
+                  value:
+                    id: 123
+                    content: "Note about a person"
+                    createdTime: "2019-08-24T14:15:22Z"
+        '400':
+          description: Invalid input
+  /v1/persons/{personId}/transactions:
+    get:
+      tags:
+        - aml
+      summary: Fetch all person transactions
+      description: NB! If there are more than 10000 results then the API shows the number of total results as 10000 and you can't paginate past the 10000th result.
+      operationId: findAllPersonTransactions
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: 'models.yaml#/components/parameters/pageParam'
+        - $ref: 'models.yaml#/components/parameters/sizeParam'
+        - $ref: 'models.yaml#/components/parameters/queryParam'
+        - $ref: 'models.yaml#/components/parameters/orderByParam'
+        - $ref: 'models.yaml#/components/parameters/orderDirectionParam'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/TransactionsPage'
+    post:
+      tags:
+        - aml
+      summary: Create new transaction
+      operationId: addTransaction
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X POST "https://app.salv.com/api/v1/persons/bbt12345/transactions" \
+              -H "Authorization: Bearer $ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "id": "txn-123",
+                "attributes": {
+                  "sender_name": "John Doe",
+                  "sender_account": "GB123456789",
+                  "receiver_name": "Jane Smith",
+                  "receiver_account": "DE987654321",
+                  "amount": "1500.00",
+                  "type": "wire_transfer",
+                  "direction": "O",
+                  "timestamp": "2024-01-20T10:30:00Z"
+                }
+              }'
+        - lang: Python
+          source: |
+            import requests
+
+            person_id = "bbt12345"
+            response = requests.post(
+                f"https://app.salv.com/api/v1/persons/{person_id}/transactions",
+                headers={"Authorization": f"Bearer {access_token}"},
+                json={
+                    "id": "txn-123",
+                    "attributes": {
+                        "sender_name": "John Doe",
+                        "sender_account": "GB123456789",
+                        "receiver_name": "Jane Smith",
+                        "receiver_account": "DE987654321",
+                        "amount": "1500.00",
+                        "type": "wire_transfer",
+                        "direction": "O",
+                        "timestamp": "2024-01-20T10:30:00Z"
+                    }
+                }
+            )
+        - lang: JavaScript
+          label: Node.js
+          source: |
+            const personId = "bbt12345";
+            const response = await fetch(
+              `https://app.salv.com/api/v1/persons/${personId}/transactions`,
+              {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${accessToken}`,
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  id: "txn-123",
+                  attributes: {
+                    sender_name: "John Doe",
+                    sender_account: "GB123456789",
+                    receiver_name: "Jane Smith",
+                    receiver_account: "DE987654321",
+                    amount: "1500.00",
+                    type: "wire_transfer",
+                    direction: "O",
+                    timestamp: "2024-01-20T10:30:00Z"
+                  }
+                })
+              }
+            );
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person
+          required: true
+          example: "bbt12345"
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiCreateTransaction'
+            examples:
+              Between_2_IBANs:
+                value:
+                  id: aeio-1234567
+                  attributes: { "sender_name": "Sheldon Cooper", "sender_account": "GB123456789", "receiver_name": "Leonard Hofstadter",
+                                "receiver_account": "DE987654321", "amount": "15678.34", "type": "wire_transfer",
+                                "direction": "I", "timestamp": "2022-01-20T08:48:39Z" }
+              Between_2_BBANs_v1:
+                value:
+                  id: aeio-1234568
+                  attributes: { "sender_name": "Footprints on the Moon", "sender_account": "123456789", "receiver_name": "Bernadette Rostenkowski",
+                                "receiver_account": "123456789", "amount": "3456.23", "type": "wire_transfer",
+                                "direction": "O", "timestamp": "2022-01-20T08:48:39Z", "sender_country": "CA", "receiver_country": "US" }
+              Between_2_BBANs_v2:
+                value:
+                  id: aeio-1234569
+                  attributes: { "sender_name": "Footprints on the Moon", "sender_account": "123456789", "receiver_name": "Bernadette Rostenkowski",
+                                "receiver_account": "123456789", "amount": "3456.23", "type": "wire_transfer",
+                                "direction": "O", "timestamp": "2022-01-20T08:48:39Z", "sender_country": "CA", "receiver_country": "US", "sender_bank_name": "Star Bank", "receiver_bank_name": "Gold bank" }
+              To_phone_number:
+                value:
+                  id: aeio-1234567
+                  attributes: { "amount": "3456.23", "type": "payment", "receiver_country": "DE", "receiver_phonenumber": "+491234567", "receiver_name": "Amy Farrah Fowler", "timestamp": "2022-01-20T08:48:39Z", "direction": "O" }
+              From_cashpoint:
+                value:
+                  id: aeio-1234567
+                  attributes: { "amount": "3456.23", "type": "deposit", "cash_point": "Seven 11 Pasadena", "timestamp": "2022-01-20T08:48:39Z", "direction": "I" }
+              To_wallet_ID:
+                value:
+                  id: aeio-1234567
+                  attributes: { "amount": "3456.23", "type": "deposit", "wallet_id": "12345-12345-12345", "sender_account": "GB12345678", "sender_name": "Stuart Bloom", "timestamp": "2022-01-20T08:48:39Z", "direction": "I" }
+              Card_payment:
+                value:
+                  id: aeio-1234567
+                  attributes: { "amount": "3456.23", "type": "mcc", "mcc": "6657", "point_of_sale_country": "US", "merchant_details": "FACEBK *ADS fb.me/ads IRL", "receiver_name": "FACEBK *ADS", "timestamp": "2022-01-20T08:48:39Z", "direction": "O" }
+      responses:
+        '200':
+          description: Created transaction
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiTransaction'
+              examples:
+                Between_2_IBANs:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "sender_name": "Sheldon Cooper", "sender_account": "GB123456789", "receiver_name": "Leonard Hofstadter",
+                                  "receiver_account": "DE987654321", "amount": "15678.34", "type": "wire_transfer",
+                                  "direction": "I", "timestamp": "2022-01-20T08:48:39Z" }
+                Between_2_BBANs_v1:
+                  value:
+                    id: aeio-1234568
+                    personId: bbt12347
+                    attributes: { "sender_name": "Footprints on the Moon", "sender_account": "123456789", "receiver_name": "Bernadette Rostenkowski",
+                                  "receiver_account": "123456789", "amount": "3456.23", "type": "wire_transfer",
+                                  "direction": "O", "timestamp": "2022-01-20T08:48:39Z", "sender_country": "CA", "receiver_country": "US" }
+                Between_2_BBANs_v2:
+                  value:
+                    id: aeio-1234569
+                    personId: bbt12348
+                    attributes: { "sender_name": "Footprints on the Moon", "sender_account": "123456789", "receiver_name": "Bernadette Rostenkowski",
+                                  "receiver_account": "123456789", "amount": "3456.23", "type": "wire_transfer",
+                                  "direction": "O", "timestamp": "2022-01-20T08:48:39Z", "sender_country": "CA", "receiver_country": "US", "sender_bank_name": "Star Bank", "receiver_bank_name": "Gold bank" }
+                To_phone_number:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "amount": "3456.23", "type": "payment", "receiver_country": "DE", "receiver_phonenumber": "+491234567", "receiver_name": "Amy Farrah Fowler", "timestamp": "2022-01-20T08:48:39Z", "direction": "O" }
+                From_cashpoint:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "amount": "3456.23", "type": "deposit", "cash_point": "Seven 11 Pasadena", "timestamp": "2022-01-20T08:48:39Z", "direction": "I" }
+                To_wallet_ID:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "amount": "3456.23", "type": "deposit", "wallet_id": "12345-12345-12345", "sender_account": "GB12345678", "sender_name": "Stuart Bloom", "timestamp": "2022-01-20T08:48:39Z", "direction": "I" }
+                Card_payment:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "amount": "3456.23", "type": "mcc", "mcc": "6657", "point_of_sale_country": "US", "merchant_details": "FACEBK *ADS fb.me/ads IRL", "receiver_name": "FACEBK *ADS", "timestamp": "2022-01-20T08:48:39Z", "direction": "O" }
+        '400':
+          description: Bad request
+          content:
+            application/text:
+              schema:
+                type: string
+                description: Error message
+        '401':
+          description: Unauthorized
+          content:
+            application/text:
+              schema:
+                type: string
+                description: Error message
+        '404':
+          description: Person not found
+          content:
+            application/text:
+              schema:
+                type: string
+                description: Error message
+        '422':
+          description: Transaction exists
+          content:
+            application/text:
+              schema:
+                type: string
+                description: Error message
+  /v1/persons/{personId}/risks:
+    get:
+      tags:
+        - risk
+      summary: Fetch person risk factors
+      operationId: getPersonRisks
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiPersonRisks'
+  /v1/persons/{personId}/transactions/{transactionId}:
+    get:
+      tags:
+        - aml
+      summary: Fetch transaction by id
+      operationId: findTransactionByIdAndPersonId
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: transactionId
+          in: path
+          description: ID of transaction to return
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiTransaction'
+              examples:
+                Between_2_IBANs:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "sender_name": "Sheldon Cooper", "sender_account": "GB123456789", "receiver_name": "Leonard Hofstadter",
+                                  "receiver_account": "DE987654321", "amount": "15678.34", "type": "wire_transfer",
+                                  "direction": "I", "timestamp": "2022-01-20T08:48:39Z" }
+                Between_2_BBANs_v1:
+                  value:
+                    id: aeio-1234568
+                    personId: bbt12347
+                    attributes: { "sender_name": "Footprints on the Moon", "sender_account": "123456789", "receiver_name": "Bernadette Rostenkowski",
+                                  "receiver_account": "123456789", "amount": "3456.23", "type": "wire_transfer",
+                                  "direction": "O", "timestamp": "2022-01-20T08:48:39Z", "sender_country": "CA", "receiver_country": "US" }
+                Between_2_BBANs_v2:
+                  value:
+                    id: aeio-1234569
+                    personId: bbt12348
+                    attributes: { "sender_name": "Footprints on the Moon", "sender_account": "123456789", "receiver_name": "Bernadette Rostenkowski",
+                                  "receiver_account": "123456789", "amount": "3456.23", "type": "wire_transfer",
+                                  "direction": "O", "timestamp": "2022-01-20T08:48:39Z", "sender_country": "CA", "receiver_country": "US", "sender_bank_name": "Star Bank", "receiver_bank_name": "Gold bank" }
+                To_phone_number:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "amount": "3456.23", "type": "payment", "receiver_country": "DE", "receiver_phonenumber": "+491234567", "receiver_name": "Amy Farrah Fowler", "timestamp": "2022-01-20T08:48:39Z", "direction": "O" }
+                From_cashpoint:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "amount": "3456.23", "type": "deposit", "cash_point": "Seven 11 Pasadena", "timestamp": "2022-01-20T08:48:39Z", "direction": "I" }
+                To_wallet_ID:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "amount": "3456.23", "type": "deposit", "wallet_id": "12345-12345-12345", "sender_account": "GB12345678", "sender_name": "Stuart Bloom", "timestamp": "2022-01-20T08:48:39Z", "direction": "I" }
+                Card_payment:
+                  value:
+                    id: aeio-1234567
+                    personId: bbt12345
+                    attributes: { "amount": "3456.23", "type": "mcc", "mcc": "6657", "point_of_sale_country": "US", "merchant_details": "FACEBK *ADS fb.me/ads IRL", "receiver_name": "FACEBK *ADS", "timestamp": "2022-01-20T08:48:39Z", "direction": "O" }
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Person or Transaction not found
+    patch:
+      tags:
+        - aml
+      description: Updates transaction. Currently status is the only attribute that can be updated.
+      summary: Update transaction
+      operationId: updateTransaction
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person
+          required: true
+          example: "user-00000009"
+          schema:
+            type: string
+            minLength: 1
+        - name: transactionId
+          in: path
+          description: ID of transaction
+          required: true
+          example: "transaction-000000000009"
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiUpdateTransaction'
+      responses:
+        '200':
+          description: Updated transaction
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiTransaction'
+        '400':
+          description: Invalid input
+        '404':
+          description: Person or Transaction not found
+  /v1/persons/{personId}/monitoring-checks:
+    post:
+      tags:
+        - monitoring-checks
+      summary: Run real-time (ONLINE) person monitoring checks
+      operationId: runPersonMonitoringChecks
+      parameters:
+        - name: personId
+          in: path
+          description: ID of a person
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: all-results
+          in: query
+          description: Return all results regardless of scenario score
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiScore'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Person not found
+        '500':
+          description: Execution of monitoring checks failed
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiExceptionMonitoringChecksFailed'
+  /v1/transactions/{transactionId}/monitoring-checks:
+    post:
+      tags:
+        - monitoring-checks
+      summary: Run real-time (ONLINE) transaction monitoring checks
+      operationId: runTransactionMonitoringChecks
+      parameters:
+        - name: transactionId
+          in: path
+          description: ID of transaction
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiScore'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Transaction not found
+        '500':
+          description: Execution of monitoring checks failed
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiExceptionMonitoringChecksFailed'
+  /v1/persons/{personId}/statuses:
+    get:
+      tags:
+        - aml
+      summary: Fetch history of status changes for the person
+      operationId: findStatusesHistory
+      parameters:
+        - name: personId
+          in: path
+          description: ID of person
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiPersonStatuses'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Person not found
+
+  /v1/alerts/{alertId}:
+    get:
+      tags:
+        - alert
+      summary: Get transaction monitoring alert
+      operationId: getAlert
+      parameters:
+        - name: alertId
+          in: path
+          description: ID of alert to get
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiAlert'
+        '400':
+          description: Invalid input
+        '404':
+          description: Alert not found
+  /v1/data-upload:
+    post:
+      tags:
+        - data-upload
+      summary: Upload data from a CSV file
+      description: Upload a list of person, person relation, or transaction data in a CSV format. Files up to 100M are supported. File processing happens asynchronously.
+      operationId: uploadData
+      parameters:
+        - name: type
+          in: query
+          description: Which type of data to upload
+          required: true
+          schema:
+            $ref: 'models.yaml#/components/schemas/ApiDataUploadType'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        '202':
+          description: Data file accepted
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiDataUpload'
+        '400':
+          description: Data file invalid
+  /v1/data-upload/{uploadId}/status:
+    get:
+      tags:
+        - data-upload
+      summary: Get status of data upload
+      operationId: getDataUploadStatus
+      parameters:
+        - name: uploadId
+          in: path
+          description: ID of data upload
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiDataUploadStatus'
+        '404':
+          description: Data upload not found
+  /v1/screening-alerts/{screeningAlertId}/hits:
+    get:
+      tags:
+        - screening-alerts
+      summary: Get screening alert hits
+      description: Returns paginated list of screening alert hits by alert id
+      operationId: getScreeningAlertHits
+      parameters:
+        - name: screeningAlertId
+          in: path
+          description: ID of the screening alert for which to return hits
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - $ref: 'models.yaml#/components/parameters/pageParam'
+        - $ref: 'models.yaml#/components/parameters/sizeParam'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiScreeningHitPage'
+              examples:
+                individual:
+                  value:
+                    number: 0
+                    size: 1
+                    total: 1
+                    content:
+                      - id: "sdf12345"
+                        listName: "Special Interest Person (SIP)"
+                        listProvider: "DOW_JONES"
+                        listType: "ADVERSE_MEDIA"
+                        score: 98
+                        attributes: {
+                          "aliases": "Lingjia Huang~Ling-Chia Huang~Ling Chia Huang~Ling Jia Huang",
+                          "associations": [
+                            {
+                              "association": {
+                                "associateId": "4286543",
+                                "ex": false,
+                                "name": "Siou-Yue Jheng",
+                                "relationship": "Associated Special Interest Person",
+                                "type": "PublicFigure"
+                              },
+                              "roles": [ ]
+                            }
+                          ],
+                          "descriptions": {
+                            "Description1": "Special Interest Person (SIP)",
+                            "Description2": "Financial Crime"
+                          },
+                          "identificationDetails": {
+                            "HM Treasury Group ID": "7584",
+                            "SECO SSID": "1147",
+                            "OFAC Unique ID": "7847",
+                            "OFAC Program ID": "IRAQ2",
+                            "DFAT Reference Number": "653",
+                            "EU Sanctions Programme Indicator": "IRQ",
+                            "UN Permanent Reference No.": "IQi.005",
+                            "EU Consolidated Electronic List ID": "29"
+                          },
+                          "mainList": "Special Interest Person (SIP)",
+                          "referenceGroupCodes": [ "EUCON", "OFACAIS" ],
+                          "providers": [ "EU", "US-OFAC" ],
+                          "name": "Ling-Jia Huang",
+                          "notes": "Keywords: tax evasion\nPeople mentioned: Huang Ling-Jia, Jheng Jing-Tai\nCompanies mentioned: Toki Choi\nProfile:\nHuang Ling-Jia, an accountant with internet fashion retailer Toki Choi, was one of 11 individuals given a suspended indictment and ordered to pay between TWD 10,000 and TWD 800,000 to the national treasury by the Taipei District Prosecutors Office on May 6, 2015, for their roles in helping Toki Choi chairman Jheng Jing-Tai to evade TWD 13.25m in company taxes.",
+                          "overview": "{\"id\":\"4286548\",\"properties\":{\"name\":[\"Ling-Jia Huang\"],\"aliases\":[\"Lingjia Huang\",\"Ling-Chia Huang\",\"Ling Chia Huang\",\"Ling Jia Huang\"],\"Citizenship\":[\"Taiwan\"],\"Country of Reported Allegation\":[\"Taiwan\"],\"Resident of\":[\"Taiwan\"],\"gender\":\"Female\",\"deceased\":\"No\"},\"referenceCodes\":null,\"recordDate\":\"2015-05-31T00:00:00\",\"type\":\"PERSON\",\"descriptions\":{\"Description1\":\"Special Interest Person (SIP)\",\"Description2\":\"Financial Crime\"},\"activeStatus\":\"Active\"}",
+                          "recordDate": 1433019600.0,
+                          "roles": [
+                            {
+                              "occupation": "International Sporting Organisation Officials",
+                              "sinceDay": "17",
+                              "sinceMonth": "Apr",
+                              "sinceYear": "1960",
+                              "title": "Alternate Member, Board of Directors, European Investment Bank (EIB)",
+                              "toDay": null,
+                              "toMonth": null,
+                              "toYear": null,
+                              "type": "Primary Occupation"
+                            }
+                          ],
+                          "type": "PERSON"
+                        }
+        '400':
+          description: Invalid input
+        '404':
+          description: Screening alert not found
+  /v1/transactions/{id}/screening-checks:
+    post:
+      tags:
+        - screening-checks
+      summary: Screen transaction
+      description: Transaction is screened. Selection of screened attributes come from configuration.
+      operationId: checkTransaction
+      parameters:
+        - name: id
+          in: path
+          description: external ID of the transaction to screen
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiScreeningResult'
+        '400':
+          description: Invalid input
+
+  /v1/persons/{id}/screening-checks:
+    post:
+      tags:
+        - screening-checks
+      summary: Screen person
+      description: Person is screened. Selection of screened attributes come from configuration.
+      operationId: checkPerson
+      parameters:
+        - name: id
+          in: path
+          description: external ID of the person to screen
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiScreeningResult'
+        '400':
+          description: Invalid input
+
+  /v2/screening-searches:
+    post:
+      tags:
+        - screening-searches
+      summary: Run screening search
+      description: Checks if provided name matches a sanctioned person or entity.
+      operationId: search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiScreeningSearchData'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'models.yaml#/components/schemas/ApiScreeningSearchHit'
+        '400':
+          description: Invalid input
+  /v1/screening-list-groups:
+    get:
+      tags:
+        - screening-list-groups
+      summary: Get List Groups
+      description: Returns all active List Groups for organisation
+      operationId: findCustomListSelectorGroups
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'models.yaml#/components/schemas/ApiCustomListSelectorGroup'
+        '400':
+          description: Invalid input
+  /v1/custom-lists/{customListId}/screening-fields:
+    get:
+      tags:
+        - custom-list-usable-field-public
+      summary: Get list usable fields
+      operationId: getListScreeningFields
+      parameters:
+        - name: customListId
+          in: path
+          description: ID of the custom list
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'models.yaml#/components/schemas/ApiCustomListUsableField'
+        '400':
+          description: Invalid input
+  /v1/custom-lists/{customListId}/records:
+    get:
+      tags:
+        - custom-list-record
+      summary: Get batch records
+      operationId: getRecords
+      parameters:
+        - name: customListId
+          in: path
+          description: ID of the custom list
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: 'models.yaml#/components/parameters/pageParam'
+        - $ref: 'models.yaml#/components/parameters/sizeParam'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/CustomListRecordPage'
+              examples:
+                Individual:
+                  value:
+                    number: 0,
+                    size: 20,
+                    total: 1223
+                    content:
+                      - id: sdf12345
+                        attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "foo": "bar", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "gender": "M", "bank_account_numbers": [ "AR45500231529936926440", "CY91660740448833368" ] }
+        '400':
+          description: Invalid input
+    post:
+      tags:
+        - custom-list-record
+      summary: Create custom list record
+      operationId: addRecord
+      parameters:
+        - name: customListId
+          in: path
+          description: ID of the custom list
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiCustomListRecord'
+            examples:
+              Individual:
+                value:
+                  id: sdf12345
+                  attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "foo": "bar", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "gender": "M", "bank_account_numbers": [ "AR45500231529936926440", "CY91660740448833368" ] }
+              Legal:
+                value:
+                  id: bbt12347
+                  attributes: { "company_name": "Footprints on the Moon", "country": "CA", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "foo": "bar", "shareholders": [
+                    {
+                      "id": "shrhldr-1",
+                      "first_name": "Howard",
+                      "last_name": "Wolowitz",
+                      "dob": "1988-07-06",
+                      "citizenship": "IL"
+                    },
+                    {
+                      "id": "shrhldr-2",
+                      "first_name": "Raj",
+                      "last_name": "Koothrappali",
+                      "dob": "1989-05-06",
+                      "citizenship": "IN"
+                    },
+                    {
+                      "id": "shrhldr-3",
+                      "company_name": "BIG Invest LLC",
+                      "country": "GB"
+                    }
+                  ],            "business_reg_number": "98-7654321" }
+      responses:
+        '200':
+          description: Created new custom list record
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiCustomListRecord'
+        '400':
+          description: Invalid input
+  /v1/custom-lists/{customListId}/records/{id}:
+    get:
+      tags:
+        - custom-list-record
+      summary: Get single Record
+      operationId: getRecord
+      parameters:
+        - name: customListId
+          in: path
+          description: ID of the custom list
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          description: ID of the record to be fetched
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Single custom list record
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiCustomListRecord'
+        '400':
+          description: Invalid input
+    put:
+      tags:
+        - custom-list-record
+      summary: Update custom list record
+      operationId: updateRecord
+      parameters:
+        - name: customListId
+          in: path
+          description: ID of the custom list
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          description: ID of the record to be updated
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiCustomListRecord'
+            examples:
+              Individual:
+                value:
+                  id: sdf12345
+                  attributes: { "first_name": "Sheldon", "last_name": "Cooper", "dob": "1983-05-12", "foo": "bar", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "country": "US", "gender": "M", "bank_account_numbers": [ "AR45500231529936926440", "CY91660740448833368" ] }
+              Legal:
+                value:
+                  id: bbt12347
+                  attributes: { "company_name": "Footprints on the Moon", "country": "CA", "city": "Pasadena", "street_address": "2311 North Los Robles Avenue", "foo": "bar", "shareholders": [
+                    {
+                      "id": "shrhldr-1",
+                      "first_name": "Howard",
+                      "last_name": "Wolowitz",
+                      "dob": "1988-07-06",
+                      "citizenship": "IL"
+                    },
+                    {
+                      "id": "shrhldr-2",
+                      "first_name": "Raj",
+                      "last_name": "Koothrappali",
+                      "dob": "1989-05-06",
+                      "citizenship": "IN"
+                    },
+                    {
+                      "id": "shrhldr-3",
+                      "company_name": "BIG Invest LLC",
+                      "country": "GB"
+                    }
+                  ],            "business_reg_number": "98-7654321" }
+      responses:
+        '200':
+          description: Updated custom list record
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiCustomListRecord'
+        '400':
+          description: Invalid input
+    delete:
+      tags:
+        - custom-list-record
+      summary: Archive custom list record
+      operationId: deleteRecord
+      parameters:
+        - name: customListId
+          in: path
+          description: ID of the custom list
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          description: ID of the record to be deleted
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Deleted custom list record
+        '400':
+          description: Invalid input
+
+  /v1/alerts/status:
+    put:
+      tags:
+        - alerts
+      operationId: publicUpdateAlertStatus
+      summary: Update alert status
+      description: Updates specified alert status, optionally includes a note to go with the update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiAlertStatusUpdate'
+      responses:
+        '200':
+          description: 'Successfully updated alert'
+        '400':
+          description: 'Invalid data'
+        '404':
+          description: 'One or more invalid alert parameters provided: ID, TYPE, STATUS'
+
+  /v1/manual-alerts:
+    post:
+      tags:
+        - manual-alerts
+      operationId: createManualAlert
+      summary: Create manual alert
+      description: Creates a new manual alert for a person or transaction.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiCreateManualAlert'
+      responses:
+        '200':
+          description: 'Successfully created manual alert'
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiManualAlert'
+        '400':
+          description: 'Invalid data'
+        '404':
+          description: 'Person or transaction not found'
+
+  /v1/manual-alerts/{alertId}:
+    put:
+      tags:
+        - manual-alerts
+      operationId: updateManualAlert
+      summary: Update manual alert
+      description: Updates a manual alert including rationale, comment, and optionally status.
+      parameters:
+        - name: alertId
+          in: path
+          description: ID of manual alert to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/components/schemas/ApiUpdateManualAlert'
+      responses:
+        '200':
+          description: 'Successfully updated manual alert'
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiManualAlert'
+        '400':
+          description: 'Invalid data'
+        '404':
+          description: 'Manual alert not found'
+
+  /v1/persons/{id}/unresolved-alerts:
+    get:
+      deprecated: true
+      tags:
+        - unresolved-alerts
+      summary: Check for unresolved monitoring or screening person alerts
+      description: Deprecated. Decision rules should be used instead.
+      operationId: hasUnresolvedPersonAlerts
+      parameters:
+        - name: id
+          in: path
+          description: external ID of the person to check
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiUnresolvedAlerts'
+        '400':
+          description: Invalid input
+
+  /v1/transactions/{id}/unresolved-alerts:
+    get:
+      deprecated: true
+      tags:
+        - unresolved-alerts
+      summary: Check for unresolved monitoring or screening transaction alerts
+      description: Deprecated. Decision rules should be used instead.
+      operationId: hasUnresolvedTransactionAlerts
+      parameters:
+        - name: id
+          in: path
+          description: external ID of the transaction to check
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/components/schemas/ApiUnresolvedAlerts'
+        '400':
+          description: Invalid input
+
+components:
+  schemas:
+    WebhookEvent:
+      title: a Webhook Event
+      description: a Webhook event
+      x-extendedDiscriminator: action
+      discriminator:
+        propertyName: action
+        mapping:
+          ALERT_CREATED: '#/components/schemas/AlertCreatedEvent'
+          ALERT_STATUS_UPDATED: '#/components/schemas/AlertStatusUpdatedEvent'
+          SCREENING_ALERT_CREATED: '#/components/schemas/ScreeningAlertCreatedEvent'
+          SCREENING_ALERT_STATUS_UPDATED: '#/components/schemas/ScreeningAlertStatusUpdatedEvent'
+          SCREENING_ALERT_UPDATED: '#/components/schemas/ScreeningAlertCreatedEvent'
+          FINAL_RISK_UPDATED: '#/components/schemas/FinalRiskUpdatedEvent'
+          PERSON_STATUS_UPDATED: '#/components/schemas/PersonStatusUpdatedEvent'
+          PERSON_CLEARED: '#/components/schemas/PersonClearedEvent'
+          TRANSACTION_CLEARED: '#/components/schemas/TransactionClearedEvent'
+          CUSTOM_LIST_RECORD_CREATED: '#/components/schemas/CustomListRecordCreatedEvent'
+          CUSTOM_LIST_RECORD_UPDATED: '#/components/schemas/CustomListRecordUpdatedEvent'
+          CUSTOM_LIST_RECORD_ARCHIVED: '#/components/schemas/CustomListRecordArchivedEvent'
+          MANUAL_ALERT_STATUS_UPDATED: '#/components/schemas/ManualAlertStatusUpdatedEvent'
+          MANUAL_ALERT_CREATED: '#/components/schemas/ManualAlertCreatedEvent'
+      properties:
+        action:
+          type: string
+        createdTime:
+          type: string
+          format: date-time
+          description: Event created time
+    AlertCreatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/AlertCreatedEventMeta'
+    AlertCreatedEventMeta:
+      required:
+        - alertId
+        - personId
+        - transactionId
+        - entityType
+        - scenarioType
+        - hits
+      allOf:
+        - properties:
+            alertId:
+              type: integer
+              format: int64
+              example: 1001
+              description: Alert unique ID
+              minimum: 1
+            personId:
+              type: string
+              example: user-0000007
+              description: Alerted person's external ID
+              minLength: 1
+            transactionId:
+              type: string
+              example: transaction-0000005
+              description: Alerted transaction's external ID
+            entityType:
+              type: string
+              enum:
+                - PERSON
+                - TRANSACTION
+              example: TRANSACTION
+              description: Entity type
+            scenarioType:
+              type: string
+              enum:
+                - ONLINE
+                - OFFLINE
+                - PERIODIC
+              example: OFFLINE
+              description: Type of scenario that created the alert
+            hits:
+              type: array
+              items:
+                $ref: '#/components/schemas/AlertCreatedEventHit'
+    AlertCreatedEventHit:
+      required:
+        - reason
+        - details
+      allOf:
+        - properties:
+            reason:
+              type: string
+              example: 'High incoming sum'
+              description: Triggered scenario reason
+              minLength: 1
+            details:
+              type: string
+              example: 'Sum >= 5 000€ (Sum: 19 694.05) in last 30 days'
+              description: Triggered scenario details
+              minLength: 1
+            scenarioHandle:
+              type: string
+              example: '1fea3186-ff7a-4602-866c-1f39e5f63fbf'
+              description: Triggered scenario handle
+              minLength: 1
+    AlertStatusUpdatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/AlertStatusUpdatedEventMeta'
+    AlertStatusUpdatedEventMeta:
+      required:
+        - alertId
+        - oldStatus
+        - newStatus
+        - personId
+        - transactionId
+        - entityType
+        - scenarioType
+        - note
+        - updatedBy
+      allOf:
+        - properties:
+            alertId:
+              type: integer
+              format: int64
+              example: 1001
+              description: Updated alert's ID
+              minimum: 1
+            oldStatus:
+              type: string
+              example: NEW
+              description: Alert's previous status
+              minLength: 1
+            newStatus:
+              type: string
+              example: CLOSED
+              description: Alert's new status
+              minLength: 1
+            personId:
+              type: string
+              example: user-0000007
+              description: Alerted person's external ID
+              minLength: 1
+            transactionId:
+              type: string
+              example: transaction-0000005
+              description: Alerted transaction's external ID
+            entityType:
+              type: string
+              enum:
+                - PERSON
+                - TRANSACTION
+              example: TRANSACTION
+              description: Entity type
+            scenarioType:
+              type: string
+              enum:
+                - ONLINE
+                - OFFLINE
+                - PERIODIC
+              example: OFFLINE
+              description: Type of scenario
+            note:
+              type: string
+              example: Name mismatch
+              description: Alert status update note
+            updatedBy:
+              type: string
+              example: Name
+              description: User updating alert
+              minLength: 1
+    PersonStatusUpdatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/PersonStatusUpdatedEventMeta'
+    PersonStatusUpdatedEventMeta:
+      required:
+        - personId
+        - oldStatus
+        - newStatus
+        - updatedBy
+      allOf:
+        - properties:
+            personId:
+              type: string
+              example: user-0000007
+              description: Updated person's external ID
+              minLength: 1
+            oldStatus:
+              type: string
+              example: NEW
+              description: Person's previous status
+              minLength: 1
+            newStatus:
+              type: string
+              example: MONITORING
+              description: Person's new status
+              minLength: 1
+            updatedBy:
+              type: string
+              example: Name
+              description: User updating the alert status
+              minLength: 1
+    ScreeningAlertCreatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/ScreeningAlertCreatedEventMeta'
+    ScreeningAlertCreatedEventMeta:
+      required:
+        - alertId
+        - entityType
+        - entityId
+        - status
+        - sanctionType
+        - screenableField
+        - screenableFieldValue
+      allOf:
+        - properties:
+            alertId:
+              type: integer
+              format: int64
+              example: 1001
+              description: Alert's ID
+              minimum: 1
+            entityType:
+              type: string
+              enum:
+                - PERSON
+                - TRANSACTION
+              example: PERSON
+              description: Entity type
+              minLength: 1
+            entityId:
+              type: string
+              example: user-0000007
+              description: Entity's external ID
+              minLength: 1
+            status:
+              type: string
+              enum:
+                - NEW
+              example: NEW
+              description: Alert's current status
+              minLength: 1
+            sanctionType:
+              $ref: 'models.yaml#/components/schemas/ApiSanctionType'
+            listCode:
+              type: string
+              example: BAN_LIST
+              description: Matched Custom list's code
+            screenableField:
+              type: string
+              example: first_name last_name
+              description: The Screenable field that generated the matches
+              minLength: 1
+            screenableFieldValue:
+              type: string
+              example: John Smith
+              description: The Screenable field value that generated the matches
+              minLength: 1
+    ScreeningAlertStatusUpdatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/ScreeningAlertStatusUpdatedEventMeta'
+    ScreeningAlertStatusUpdatedEventMeta:
+      required:
+        - alertId
+        - oldStatus
+        - newStatus
+        - entityType
+        - entityId
+        - sanctionType
+        - note
+        - updatedBy
+      allOf:
+        - properties:
+            alertId:
+              type: integer
+              format: int64
+              example: 1001
+              description: Updated alert's ID
+              minimum: 1
+            oldStatus:
+              example: NEW
+              description: Alert's previous status
+              minLength: 1
+              type: string
+            newStatus:
+              example: CLOSED AS FALSE POSITIVE
+              description: Alert's new status
+              minLength: 1
+              type: string
+            entityType:
+              type: string
+              enum:
+                - PERSON
+                - TRANSACTION
+              example: PERSON
+              description: Entity type
+              minLength: 1
+            entityId:
+              type: string
+              example: user-0000007
+              description: Entity's external ID
+              minLength: 1
+            sanctionType:
+              $ref: 'models.yaml#/components/schemas/ApiSanctionType'
+            listCode:
+              type: string
+              example: BAN_LIST
+              description: Matched Custom list's code
+            note:
+              type: string
+              example: Name mismatch
+              description: Screening Alert status update note
+            updatedBy:
+              type: string
+              example: Name
+              description: User updating alert
+              minLength: 1
+    FinalRiskUpdatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/FinalRiskUpdatedEventMeta'
+    FinalRiskUpdatedEventMeta:
+      required:
+        - personId
+        - currentLevel
+      allOf:
+        - properties:
+            personId:
+              type: string
+              example: user-0000007
+              description: Person's external ID
+              minLength: 1
+            previousLevel:
+              type: string
+              enum:
+                - LOW
+                - LOW_TO_MEDIUM
+                - MEDIUM
+                - MEDIUM_TO_HIGH
+                - HIGH
+                - UNACCEPTABLE
+              example: LOW
+              description: Previous (if present) final risk level of person
+            currentLevel:
+              type: string
+              enum:
+                - LOW
+                - LOW_TO_MEDIUM
+                - MEDIUM
+                - MEDIUM_TO_HIGH
+                - HIGH
+                - UNACCEPTABLE
+              example: HIGH
+              description: Current final risk level of person
+            previousScore:
+              type: number
+              format: double
+              example: 2.00
+              description: Previous (if present) final risk score of person
+            currentScore:
+              type: number
+              format: double
+              example: 2.00
+              description: Current final risk score of person
+    PersonClearedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/PersonClearedEventEventMeta'
+    PersonClearedEventEventMeta:
+      required:
+        - personId
+      allOf:
+        - properties:
+            personId:
+              type: string
+              example: user-0000007
+              description: Person's external ID
+              minLength: 1
+    TransactionClearedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/TransactionClearedEventMeta'
+    TransactionClearedEventMeta:
+      required:
+        - transactionId
+      allOf:
+        - properties:
+            transactionId:
+              type: string
+              example: transaction-0000005
+              description: Transaction's external ID
+              minLength: 1
+    CustomListRecordCreatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/CustomListRecordCreatedEventMeta'
+    CustomListRecordCreatedEventMeta:
+      required:
+        - listId
+        - recordId
+      allOf:
+        - properties:
+            listId:
+              type: string
+              example: 7c706c3e-a656-477d-8ef2-a816bfb823f2
+              description: List ID
+              minLength: 1
+            recordId:
+              type: string
+              example: record-123
+              description: Record ID
+              minLength: 1
+    CustomListRecordUpdatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/CustomListRecordUpdatedEventMeta'
+    CustomListRecordUpdatedEventMeta:
+      required:
+        - listId
+        - recordId
+      allOf:
+        - properties:
+            listId:
+              type: string
+              example: 7c706c3e-a656-477d-8ef2-a816bfb823f2
+              description: List ID
+              minLength: 1
+            recordId:
+              type: string
+              example: record-123
+              description: Record ID
+              minLength: 1
+    CustomListRecordArchivedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/CustomListRecordArchivedEventMeta'
+    CustomListRecordArchivedEventMeta:
+      required:
+        - listId
+        - recordId
+      allOf:
+        - properties:
+            listId:
+              type: string
+              example: 7c706c3e-a656-477d-8ef2-a816bfb823f2
+              description: List ID
+              minLength: 1
+            recordId:
+              type: string
+              example: record-123
+              description: Record ID
+              minLength: 1
+    ManualAlertStatusUpdatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/ManualAlertStatusUpdatedEventMeta'
+    ManualAlertStatusUpdatedEventMeta:
+      required:
+        - alertId
+        - oldStatus
+        - newStatus
+        - personId
+        - updatedBy
+      allOf:
+        - properties:
+            alertId:
+              type: integer
+              format: int64
+              example: 1001
+              description: Updated alert's ID
+              minimum: 1
+            oldStatus:
+              example: NEW
+              description: Alert's previous status
+              minLength: 1
+              type: string
+            newStatus:
+              example: CLOSED AS FALSE POSITIVE
+              description: Alert's new status
+              minLength: 1
+              type: string
+            personId:
+              type: string
+              example: user-0000007
+              description: Persons's external ID
+              minLength: 1
+            transactionId:
+              type: string
+              example: transaction-0000005
+              description: Transaction's external ID
+              minLength: 1
+            updatedBy:
+              type: string
+              example: Name
+              description: User updating alert
+              minLength: 1
+    ManualAlertCreatedEvent:
+      required:
+        - metadata
+      allOf:
+        - $ref: '#/components/schemas/WebhookEvent'
+        - properties:
+            metadata:
+              $ref: '#/components/schemas/ManualAlertCreatedEventMeta'
+    ManualAlertCreatedEventMeta:
+      required:
+        - alertId
+        - personId
+        - rationale
+        - rationaleComment
+        - userId
+      allOf:
+        - properties:
+            alertId:
+              type: integer
+              format: int64
+              example: 1001
+              description: Updated alert's ID
+              minimum: 1
+            personId:
+              type: string
+              example: user-0000007
+              description: Persons's external ID
+              minLength: 1
+            transactionId:
+              type: string
+              example: transaction-0000005
+              description: Transaction's external ID
+              minLength: 1
+            rationale:
+              example: SUSPICIOUS_ACTIVITY
+              description: Alert rationale code
+              minLength: 1
+              type: string
+            rationaleComment:
+              example: Test
+              description: Comment explaining the rationale choice
+              minLength: 1
+              type: string
+            userId:
+              type: integer
+              format: int64
+              example: 123
+              description: ID of the user that has created the alert
+              minimum: 1
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: |
+        In order to use the API, you need to generate client credentials using [Salv UI](https://demo.salv.com/credentials).
+        Never share your secret keys. Keep them guarded and secure.
+
+        We use OAuth2 client credentials flow to issue our API tokens.
+        By default our API tokens have expiration time of 50 years, so effectively they never expire.
+        Please do not make any assumptions about the content of the access_token.
+        At the moment we use a JWT token, but it can change to any other string with the future updates.
+
+        An API token can be invalidated using Salv UI by deleting the client credentials that were used to generate the token.
+
+        Please make sure you only request it once per reasonable amount of time,
+        as `oauth/token` endpoint has a rate limit of **10 requests per minute** per IP address.
+
+        | Environment | Token URL |
+        |-------------|-----------|
+        | Production | `https://app.salv.com/oauth/token` |
+        | Sandbox | `https://demo.salv.com/oauth/token` |
+
+        Use the token URL matching your selected server environment.
+      flows:
+        clientCredentials:
+          tokenUrl: https://app.salv.com/oauth/token
+          x-tokenUrl-sandbox: https://demo.salv.com/oauth/token
+          scopes:
+            aml: Can use AML API
+security:
+  - OAuth2:
+      - aml

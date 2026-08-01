@@ -1,0 +1,30 @@
+generated: '2026-07-21'
+method: derived
+source: openapi/salv-aml-openapi-original.yml
+format: custom-json
+note: >-
+  Derived from the 4xx/5xx responses declared across the Salv AML OpenAPI.
+  Error bodies are returned as application/json (some as application/text) and do
+  NOT use RFC 9457 application/problem+json. Titles/descriptions are taken verbatim
+  from the spec response descriptions.
+problems:
+- status: 400
+  title: Bad request
+  meaning: The request was malformed or failed validation.
+  remediation: Check required fields, types, and the request schema for the operation.
+- status: 401
+  title: Unauthorized
+  meaning: Missing, invalid, or expired OAuth2 bearer token.
+  remediation: Obtain a token via the client-credentials flow at /oauth/token with scope aml.
+- status: 404
+  title: Resource not found
+  meaning: The referenced person, transaction, alert, or record does not exist.
+  remediation: Verify the path id; ensure the entity was created/uploaded first.
+- status: 422
+  title: Unprocessable entity
+  meaning: Semantic conflict such as a person already existing.
+  remediation: Fetch/patch the existing entity instead of creating a duplicate.
+- status: 500
+  title: Internal server error
+  meaning: Server-side failure, e.g. execution of monitoring checks failed.
+  remediation: Retry with backoff; contact support@salv.com if it persists.

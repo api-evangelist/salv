@@ -1,0 +1,69 @@
+generated: '2026-07-21'
+method: derived
+status: candidate
+source: openapi/salv-aml-openapi-original.yml
+note: >-
+  No official hosted/remote MCP server was found for Salv. This is a derived
+  candidate tool list, one tool per OpenAPI operation, as a starting point for
+  an MCP wrapper over the Salv AML API.
+server:
+  name: salv-aml
+  transport: http
+tools:
+- name: add_person
+  description: Create a person record (v2).
+  source_operation: openapi/salv-aml-openapi-original.yml#addPersonV2
+- name: find_persons
+  description: Search person records (v2).
+  source_operation: openapi/salv-aml-openapi-original.yml#findAllPersons
+- name: patch_person
+  description: Partially update a person (v2).
+  source_operation: openapi/salv-aml-openapi-original.yml#patchPersonV2
+- name: get_person
+  description: Fetch a person by id.
+  source_operation: openapi/salv-aml-openapi-original.yml#findPersonById
+- name: add_transaction
+  description: Add a transaction for a person.
+  source_operation: openapi/salv-aml-openapi-original.yml#addTransaction
+- name: get_person_risks
+  description: Retrieve a person's risk factors.
+  source_operation: openapi/salv-aml-openapi-original.yml#getPersonRisks
+- name: run_person_monitoring_checks
+  description: Run monitoring checks against a person.
+  source_operation: openapi/salv-aml-openapi-original.yml#runPersonMonitoringChecks
+- name: run_transaction_monitoring_checks
+  description: Run monitoring checks against a transaction.
+  source_operation: openapi/salv-aml-openapi-original.yml#runTransactionMonitoringChecks
+- name: check_person_screening
+  description: Screen a person against sanctions/PEP/adverse-media lists.
+  source_operation: openapi/salv-aml-openapi-original.yml#checkPerson
+- name: check_transaction_screening
+  description: Screen a transaction.
+  source_operation: openapi/salv-aml-openapi-original.yml#checkTransaction
+- name: screening_search
+  description: Ad-hoc name screening search without prior upload (v2).
+  source_operation: openapi/salv-aml-openapi-original.yml#search
+- name: get_screening_alert_hits
+  description: Retrieve hits for a screening alert.
+  source_operation: openapi/salv-aml-openapi-original.yml#getScreeningAlertHits
+- name: get_alert
+  description: Fetch a monitoring alert by id.
+  source_operation: openapi/salv-aml-openapi-original.yml#getAlert
+- name: update_alert_status
+  description: Update the status of an alert.
+  source_operation: openapi/salv-aml-openapi-original.yml#publicUpdateAlertStatus
+- name: create_manual_alert
+  description: Create a manual alert.
+  source_operation: openapi/salv-aml-openapi-original.yml#createManualAlert
+- name: get_custom_list_records
+  description: List records in a custom list.
+  source_operation: openapi/salv-aml-openapi-original.yml#getRecords
+- name: add_custom_list_record
+  description: Add a record to a custom list.
+  source_operation: openapi/salv-aml-openapi-original.yml#addRecord
+- name: upload_data
+  description: Bulk upload persons/transactions/relations via CSV.
+  source_operation: openapi/salv-aml-openapi-original.yml#uploadData
+- name: get_data_upload_status
+  description: Poll the status of a bulk data upload.
+  source_operation: openapi/salv-aml-openapi-original.yml#getDataUploadStatus

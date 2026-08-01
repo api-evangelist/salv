@@ -1,0 +1,28 @@
+# Salv
+
+> Salv is a financial-crime prevention (FinCrime) SaaS platform for banks, fintechs, and payment service providers. Its AML API provides sanctions/PEP/adverse-media screening, real-time and post-event transaction monitoring, risk scoring, and collaborative intelligence sharing (Salv Bridge). Authentication is OAuth2 client-credentials (scope `aml`); production is app.salv.com and sandbox is demo.salv.com.
+
+## APIs
+
+- [Salv AML API](https://docs.salv.com/): 36 operations across persons, transactions, monitoring, screening, risk, alerts, custom lists, and data upload.
+- [OpenAPI spec](https://docs.salv.com/api/public.yaml): OpenAPI 3.0.3, version 1.0.9.
+
+## Specs
+
+- [OpenAPI (harvested)](openapi/salv-aml-openapi-original.yml)
+- [Webhook event catalog](asyncapi/salv-webhooks.yml)
+- [Authentication profile](authentication/salv-authentication.yml)
+- [OAuth scopes](scopes/salv-scopes.yml)
+- [Error catalog](errors/salv-problem-types.yml)
+- [API conventions](conventions/salv-conventions.yml)
+- [Data model](data-model/salv-data-model.yml)
+- [Lifecycle](lifecycle/salv-lifecycle.yml)
+
+## Docs
+
+- [Documentation](https://docs.salv.com/)
+- [Getting started / sign up](https://docs.salv.com/) (contact sales@salv.com)
+- [Blog](https://salv.com/blog/)
+- [Bug bounty / vulnerability disclosure](https://salv.com/bug-bounty/)
+- [Privacy policy](https://salv.com/privacy-policy/)
+- [Support](mailto:support@salv.com)

@@ -1,0 +1,50 @@
+generated: '2026-07-21'
+method: derived
+source: openapi/salv-aml-openapi-original.yml (paths + id-reference fields)
+entities:
+- name: Person
+  id_field: personId
+  description: A monitored customer/individual or entity.
+- name: Transaction
+  id_field: transactionId
+  description: A financial transaction belonging to a person.
+- name: Alert
+  id_field: alertId
+  description: A monitoring alert raised by a scenario/manual action.
+- name: ScreeningAlert
+  id_field: screeningAlertId
+  description: An alert raised by sanctions/PEP/adverse-media screening.
+- name: CustomList
+  id_field: customListId
+  description: A user-defined list used for screening/monitoring.
+- name: CustomListRecord
+  id_field: id
+  description: A record within a custom list.
+- name: DataUpload
+  id_field: uploadId
+  description: A bulk CSV ingestion job.
+relationships:
+- from: Transaction
+  to: Person
+  type: belongs_to
+  via: personId
+- from: Person
+  to: Transaction
+  type: has_many
+  via: personId
+- from: Person
+  to: Alert
+  type: has_many
+  via: personId
+- from: Person
+  to: Risk
+  type: has_many
+  via: personId
+- from: ScreeningAlert
+  to: ScreeningAlertHit
+  type: has_many
+  via: screeningAlertId
+- from: CustomList
+  to: CustomListRecord
+  type: has_many
+  via: customListId

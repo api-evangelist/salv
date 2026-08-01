@@ -1,0 +1,30 @@
+generated: '2026-07-21'
+method: searched
+source: >-
+  openapi/salv-aml-openapi-original.yml,
+  app.salv.com/.well-known/oauth-authorization-server, salv.com security posture
+standards:
+- id: oauth2
+  conforms: true
+  evidence: OpenAPI securityScheme type oauth2 (clientCredentials flow, scope aml)
+- id: oauth2-client-credentials
+  conforms: true
+  evidence: token_endpoint + client_credentials grant advertised at /.well-known/oauth-authorization-server
+- id: rfc8414-authorization-server-metadata
+  conforms: true
+  evidence: valid /.well-known/oauth-authorization-server JSON document served on app.salv.com
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: error responses use application/json and application/text, not application/problem+json
+- id: soc2-type2
+  conforms: true
+  evidence: SOC 2 Type 2 compliance stated on salv.com
+- id: iso-27001
+  conforms: true
+  evidence: ISO/IEC 27001:2022 certification stated on salv.com
+- id: gdpr
+  conforms: true
+  evidence: GDPR compliance stated on salv.com; EU (Estonia) based FinCrime platform
+- id: owasp
+  conforms: true
+  evidence: OWASP standards referenced in Salv security posture

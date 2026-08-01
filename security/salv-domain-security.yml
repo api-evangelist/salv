@@ -1,0 +1,22 @@
+generated: '2026-07-21'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: salv.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 15 17:00:16 2026 GMT
+  hsts: false
+domains:
+- domain: salv.com
+  dnssec: false
+  caa:
+  - 0 issuewild "ssl.com"
+  - 0 issue "amazon.com"
+  - 0 issue "amazonaws.com"
+  - 0 issue "amazontrust.com"
+  - 0 issue "awstrust.com"
+  - 0 issue "comodoca.com"
+  spf: true
+  dmarc: true
+  dmarc_policy: reject

@@ -1,0 +1,574 @@
+generated: '2026-07-21'
+method: generated
+source: openapi/salv-aml-openapi-original.yml
+description: Recommended x-agentic-access execution contracts, classified heuristically from
+  the OpenAPI. A governance starting point for exposing this API to AI agents — review and bind
+  audience per deployment. See research/curity/agentic-governance/.
+summary:
+  operations: 36
+  by_action_class:
+    acting: 21
+    connected: 15
+  by_consequence:
+    write: 21
+    read: 15
+  human_in_the_loop_required: 0
+operations:
+- path: /v2/persons
+  method: post
+  operationId: addPersonV2
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v2/persons/search
+  method: post
+  operationId: findAllPersons
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v2/persons/{personId}
+  method: patch
+  operationId: patchPersonV2
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v2/persons/{personId}
+  method: put
+  operationId: updatePersonV2
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons
+  method: get
+  operationId: findAllPersonsDeprecated
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/persons
+  method: post
+  operationId: addPerson
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons/{personId}
+  method: get
+  operationId: findPersonById
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/persons/{personId}
+  method: patch
+  operationId: updatePerson
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons/{personId}/notes
+  method: post
+  operationId: addPersonNote
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons/{personId}/transactions
+  method: get
+  operationId: findAllPersonTransactions
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/persons/{personId}/transactions
+  method: post
+  operationId: addTransaction
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons/{personId}/risks
+  method: get
+  operationId: getPersonRisks
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/persons/{personId}/transactions/{transactionId}
+  method: get
+  operationId: findTransactionByIdAndPersonId
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/persons/{personId}/transactions/{transactionId}
+  method: patch
+  operationId: updateTransaction
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons/{personId}/monitoring-checks
+  method: post
+  operationId: runPersonMonitoringChecks
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/transactions/{transactionId}/monitoring-checks
+  method: post
+  operationId: runTransactionMonitoringChecks
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons/{personId}/statuses
+  method: get
+  operationId: findStatusesHistory
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/alerts/{alertId}
+  method: get
+  operationId: getAlert
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/data-upload
+  method: post
+  operationId: uploadData
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/data-upload/{uploadId}/status
+  method: get
+  operationId: getDataUploadStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/screening-alerts/{screeningAlertId}/hits
+  method: get
+  operationId: getScreeningAlertHits
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/transactions/{id}/screening-checks
+  method: post
+  operationId: checkTransaction
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons/{id}/screening-checks
+  method: post
+  operationId: checkPerson
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v2/screening-searches
+  method: post
+  operationId: search
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/screening-list-groups
+  method: get
+  operationId: findCustomListSelectorGroups
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/custom-lists/{customListId}/screening-fields
+  method: get
+  operationId: getListScreeningFields
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/custom-lists/{customListId}/records
+  method: get
+  operationId: getRecords
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/custom-lists/{customListId}/records
+  method: post
+  operationId: addRecord
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/custom-lists/{customListId}/records/{id}
+  method: get
+  operationId: getRecord
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/custom-lists/{customListId}/records/{id}
+  method: put
+  operationId: updateRecord
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/custom-lists/{customListId}/records/{id}
+  method: delete
+  operationId: deleteRecord
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/alerts/status
+  method: put
+  operationId: publicUpdateAlertStatus
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/manual-alerts
+  method: post
+  operationId: createManualAlert
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/manual-alerts/{alertId}
+  method: put
+  operationId: updateManualAlert
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+    scope:
+    - aml
+- path: /v1/persons/{id}/unresolved-alerts
+  method: get
+  operationId: hasUnresolvedPersonAlerts
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml
+- path: /v1/transactions/{id}/unresolved-alerts
+  method: get
+  operationId: hasUnresolvedTransactionAlerts
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+    scope:
+    - aml

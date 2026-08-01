@@ -1,0 +1,21 @@
+generated: '2026-07-21'
+method: searched
+source: docs.salv.com
+note: >-
+  Salv separates test and live via distinct environments (sandbox = demo,
+  production = app) selected through the OpenAPI `environment` server variable.
+  No published magic test values (test cards/persons) were found; test data is
+  entered into the demo tenant. Only published values are recorded here.
+environments:
+- name: sandbox
+  host: https://demo.salv.com/api
+  token_url: https://demo.salv.com/oauth/token
+  credentials_ui: https://demo.salv.com/credentials
+- name: production
+  host: https://app.salv.com/api
+  token_url: https://app.salv.com/oauth/token
+  credentials_ui: https://demo.salv.com/credentials
+selection:
+  mechanism: openapi-server-variable
+  variable: environment
+  values: [app, demo]

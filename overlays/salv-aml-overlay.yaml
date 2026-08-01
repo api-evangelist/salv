@@ -1,0 +1,19 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Salv AML API
+  version: 1.0.0
+extends: openapi/salv-aml-openapi-original.yml
+actions:
+- target: $.info
+  update:
+    x-apievangelist-enriched: '2026-07-21'
+    x-apievangelist-provider: salv
+    x-apievangelist-notes: >-
+      OAuth2 client-credentials (scope aml). Webhook surface (14 event types,
+      discriminator `action`) documented but no AsyncAPI. Errors are JSON but not
+      RFC 9457. URI-path versioning (v1/v2); GET /v1/persons is deprecated.
+- target: $.info
+  update:
+    x-agentic-access: agentic-access/salv-agentic-access.yml
+    x-webhooks-catalog: asyncapi/salv-webhooks.yml
+    x-error-catalog: errors/salv-problem-types.yml

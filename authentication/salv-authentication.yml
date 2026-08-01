@@ -1,0 +1,24 @@
+generated: '2026-07-21'
+method: derived
+source: openapi/salv-aml-openapi-original.yml
+summary:
+  types:
+  - oauth2
+  oauth2_flows:
+  - clientCredentials
+schemes:
+- name: OAuth2
+  type: oauth2
+  flows:
+  - flow: clientCredentials
+    tokenUrl: https://app.salv.com/oauth/token
+    scopes: 1
+  description: |-
+    In order to use the API, you need to generate client credentials using [Salv UI](https://demo.salv.com/credentials).
+    Never share your secret keys. Keep them guarded and secure.
+
+    We use OAuth2 client credentials flow to issue our API tokens.
+    By default our API tokens have expiration time of 50 years, so effectively they never expire.
+    Please do not make any assumptions about the content of the acces
+  sources:
+  - openapi/salv-aml-openapi-original.yml

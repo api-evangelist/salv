@@ -1,0 +1,5 @@
+Contact: mailto:security@salv.com
+Encryption: https://salv.com/assets/files/pgp-key.asc
+Preferred-Languages: en
+Policy: https://salv.com/bug-bounty/
+Expires: 2030-05-25

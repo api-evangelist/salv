@@ -1,0 +1,13 @@
+generated: '2026-07-21'
+method: searched
+source: docs.salv.com + openapi/salv-aml-openapi-original.yml
+rate_limits:
+- scope: oauth-token-endpoint
+  endpoint: /oauth/token
+  limit_count: 10
+  window: 1m
+  key: per-ip
+  note: >-
+    Token issuance is limited to 10 requests per minute per IP. Access tokens are
+    long-lived (default 50-year expiry), so tokens should be cached and reused
+    rather than re-requested per call.

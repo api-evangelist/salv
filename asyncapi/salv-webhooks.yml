@@ -1,0 +1,55 @@
+generated: '2026-07-21'
+method: searched
+source: openapi/salv-aml-openapi-original.yml (WebhookEvent discriminator) + docs.salv.com
+spec_type: Webhooks
+note: >-
+  Salv documents a webhook surface but publishes no AsyncAPI document. Event
+  payload schemas are defined in the OpenAPI components (WebhookEvent +
+  per-action event schemas); the discriminator field is `action`. Salv POSTs
+  these events to a customer-configured endpoint.
+delivery:
+  transport: https-post
+  discriminator_field: action
+events:
+- action: ALERT_CREATED
+  description: A monitoring alert was created.
+  schema: AlertCreatedEvent
+- action: ALERT_STATUS_UPDATED
+  description: A monitoring alert's status changed.
+  schema: AlertStatusUpdatedEvent
+- action: SCREENING_ALERT_CREATED
+  description: A screening (sanctions/PEP/adverse-media) alert was created.
+  schema: ScreeningAlertCreatedEvent
+- action: SCREENING_ALERT_STATUS_UPDATED
+  description: A screening alert's status changed.
+  schema: ScreeningAlertStatusUpdatedEvent
+- action: SCREENING_ALERT_UPDATED
+  description: A screening alert was updated.
+  schema: ScreeningAlertCreatedEvent
+- action: FINAL_RISK_UPDATED
+  description: A person's final risk score was updated.
+  schema: FinalRiskUpdatedEvent
+- action: PERSON_STATUS_UPDATED
+  description: A person's status changed.
+  schema: PersonStatusUpdatedEvent
+- action: PERSON_CLEARED
+  description: A person was cleared.
+  schema: PersonClearedEvent
+- action: TRANSACTION_CLEARED
+  description: A transaction was cleared.
+  schema: TransactionClearedEvent
+- action: CUSTOM_LIST_RECORD_CREATED
+  description: A record was added to a custom list.
+  schema: CustomListRecordCreatedEvent
+- action: CUSTOM_LIST_RECORD_UPDATED
+  description: A custom list record was updated.
+  schema: CustomListRecordUpdatedEvent
+- action: CUSTOM_LIST_RECORD_ARCHIVED
+  description: A custom list record was archived.
+  schema: CustomListRecordArchivedEvent
+- action: MANUAL_ALERT_STATUS_UPDATED
+  description: A manual alert's status changed.
+  schema: ManualAlertStatusUpdatedEvent
+- action: MANUAL_ALERT_CREATED
+  description: A manual alert was created.
+  schema: ManualAlertCreatedEvent

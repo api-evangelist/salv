@@ -1,0 +1,42 @@
+{
+  "provider": "salv",
+  "sources": [
+    "salv-alert-api-openapi.yml",
+    "salv-alerts-api-openapi.yml",
+    "salv-aml-api-openapi.yml",
+    "salv-custom-list-record-api-openapi.yml",
+    "salv-custom-list-usable-field-public-api-openapi.yml",
+    "salv-data-upload-api-openapi.yml",
+    "salv-manual-alerts-api-openapi.yml",
+    "salv-monitoring-checks-api-openapi.yml",
+    "salv-note-api-openapi.yml",
+    "salv-risk-api-openapi.yml",
+    "salv-screening-alerts-api-openapi.yml",
+    "salv-screening-checks-api-openapi.yml",
+    "salv-screening-list-groups-api-openapi.yml",
+    "salv-screening-searches-api-openapi.yml",
+    "salv-unresolved-alerts-api-openapi.yml"
+  ],
+  "outputs": [
+    "salv-alert-api-openapi.yml",
+    "salv-alerts-api-openapi.yml",
+    "salv-aml-api-openapi.yml",
+    "salv-custom-list-record-api-openapi.yml",
+    "salv-custom-list-usable-field-public-api-openapi.yml",
+    "salv-data-upload-api-openapi.yml",
+    "salv-manual-alerts-api-openapi.yml",
+    "salv-monitoring-checks-api-openapi.yml",
+    "salv-note-api-openapi.yml",
+    "salv-risk-api-openapi.yml",
+    "salv-screening-alerts-api-openapi.yml",
+    "salv-screening-checks-api-openapi.yml",
+    "salv-screening-list-groups-api-openapi.yml",
+    "salv-screening-searches-api-openapi.yml",
+    "salv-unresolved-alerts-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}

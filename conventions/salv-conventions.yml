@@ -1,0 +1,37 @@
+generated: '2026-07-21'
+method: derived
+source: openapi/salv-aml-openapi-original.yml + docs.salv.com
+authentication:
+  style: oauth2-client-credentials
+  scope: aml
+  token_url: https://app.salv.com/oauth/token
+  sandbox_token_url: https://demo.salv.com/oauth/token
+  detail: authentication/salv-authentication.yml
+idempotency:
+  supported: false
+  note: >-
+    No idempotency-key header or parameter is documented in the Salv AML OpenAPI.
+    Duplicate creation is guarded semantically (a 422 "person exists" is returned)
+    rather than via an idempotency key.
+pagination:
+  style: none-standard
+  note: >-
+    No cursor/offset pagination parameters are declared. Search endpoints accept
+    an `all-results` query flag; bulk ingestion is via /v1/data-upload CSV.
+versioning:
+  style: uri-path
+  current: v2
+  detail: lifecycle/salv-lifecycle.yml
+error_envelope:
+  media_types: [application/json, application/text]
+  rfc9457: false
+  detail: errors/salv-problem-types.yml
+rate_limiting:
+  documented: true
+  note: >-
+    The token endpoint (/oauth/token) is limited to 10 requests per minute per IP;
+    tokens are long-lived (default 50-year expiry) so they should be requested rarely.
+  detail: rate-limits/salv-rate-limits.yml
+events:
+  style: webhooks
+  detail: asyncapi/salv-webhooks.yml

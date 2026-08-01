@@ -1,0 +1,16 @@
+generated: '2026-07-21'
+method: generated
+source: openapi/salv-aml-openapi-original.yml
+skills:
+- file: salv-screen-person.md
+  name: Screen a person against sanctions, PEP and adverse-media lists
+  api: openapi/salv-aml-openapi-original.yml
+  operations: [addPersonV2, checkPerson, getScreeningAlertHits]
+- file: salv-monitor-transaction.md
+  name: Monitor a transaction and handle the alert
+  api: openapi/salv-aml-openapi-original.yml
+  operations: [addTransaction, runTransactionMonitoringChecks, getAlert, publicUpdateAlertStatus]
+- file: salv-manage-custom-list.md
+  name: Manage a custom screening list
+  api: openapi/salv-aml-openapi-original.yml
+  operations: [getRecords, addRecord, getRecord, updateRecord, deleteRecord]

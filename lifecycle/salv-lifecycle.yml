@@ -1,0 +1,23 @@
+generated: '2026-07-21'
+method: derived
+source: openapi/salv-aml-openapi-original.yml + docs.salv.com
+versioning:
+  scheme: uri-path
+  current: v2
+  note: >-
+    Resources are versioned in the path (/v1/..., /v2/...). Persons and screening
+    searches have both v1 and v2 surfaces; v2 is current for persons.
+  docs: https://docs.salv.com/
+deprecation:
+  observed: true
+  note: >-
+    GET /v1/persons (findAllPersonsDeprecated) is marked deprecated in the spec,
+    superseded by POST /v2/persons/search (findAllPersons). No formal RFC 8594
+    Sunset/Deprecation header policy was found published.
+sla:
+  found: false
+status_page:
+  found: false
+  note: No public status page (status.salv.com) was found.
+deprecated_operations:
+- openapi/salv-aml-openapi-original.yml#findAllPersonsDeprecated
