@@ -354,6 +354,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/salv-aml-overlay.yaml
 - type: DeveloperPortal
   url: https://docs.salv.com/
 - type: Documentation
