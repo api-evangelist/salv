@@ -1,0 +1,252 @@
+{
+  "item": [
+    {
+      "id": "c585c3fe-5c0c-4ea8-8a02-dea5015d6efe",
+      "name": "note",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "0d36a0d4-a4b5-4f28-9b24-12fa1cb4484c",
+          "name": "Creates new note",
+          "request": {
+            "name": "Creates new note",
+            "description": {},
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":personId",
+                "notes"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) ID of person"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "ca29052a-80c6-4694-82c3-ed5c2840b03d",
+              "name": "Created note",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "notes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Note about a person\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 123,\n  \"content\": \"Note about a person\",\n  \"createdTime\": \"2019-08-24T14:15:22Z\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "774553de-df2b-490b-969b-b72129be9918",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "notes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Note about a person\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "app",
+      "key": "environment"
+    },
+    {
+      "type": "string",
+      "value": "https://{{environment}}.salv.com/api/",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "scope",
+        "value": "aml"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://app.salv.com/oauth/token"
+      },
+      {
+        "key": "grant_type",
+        "value": "client_credentials"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "f2532be1-601a-4714-b855-88419c35a4b9",
+    "name": "Salv AML alert note API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "# Introduction\nWelcome to the Salv AML API documentation.\n\nThe Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.\n\nAPI definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml\n\n\nContact Support:\n Name: Support\n Email: support@salv.com",
+      "type": "text/plain"
+    }
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "item": [
+    {
+      "id": "6cdc987e-f323-4942-8bf8-cc108b37ae45",
+      "name": "screening-list-groups",
+      "description": {
+        "content": "Screening selectors can be used in screening search. These can be used in [Screening search](#tag/screening-searches/operation/search)",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "1cfaf439-2420-4c77-8ba9-6da341e5b3db",
+          "name": "Get List Groups",
+          "request": {
+            "name": "Get List Groups",
+            "description": {
+              "content": "Returns all active List Groups for organisation",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "screening-list-groups"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "941b6529-2b28-48e3-9014-978087bfd719",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "screening-list-groups"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"value\": \"reference models.yaml#/components/schemas/ApiCustomListSelectorGroup not found in the OpenAPI spec\"\n  },\n  {\n    \"value\": \"reference models.yaml#/components/schemas/ApiCustomListSelectorGroup not found in the OpenAPI spec\"\n  }\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c62b8257-51c2-4a67-b039-578182561220",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "screening-list-groups"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "app",
+      "key": "environment"
+    },
+    {
+      "type": "string",
+      "value": "https://{{environment}}.salv.com/api/",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "scope",
+        "value": "aml"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://app.salv.com/oauth/token"
+      },
+      {
+        "key": "grant_type",
+        "value": "client_credentials"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "2090bd1f-be9f-4eb3-86bc-698878b033f1",
+    "name": "Salv AML alert screening-list-groups API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "# Introduction\nWelcome to the Salv AML API documentation.\n\nThe Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.\n\nAPI definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml\n\n\nContact Support:\n Name: Support\n Email: support@salv.com",
+      "type": "text/plain"
+    }
+  }
+}

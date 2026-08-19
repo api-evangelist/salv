@@ -1,0 +1,394 @@
+{
+  "item": [
+    {
+      "id": "c5eb06a8-1f96-4d2c-8cf1-35bc85bcb611",
+      "name": "unresolved-alerts",
+      "description": {
+        "content": "Endpoints to check if given entity has anything unresolved",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "8fc200e9-0780-4246-8255-10884d39d3b8",
+          "name": "Check for unresolved monitoring or screening person alerts",
+          "request": {
+            "name": "Check for unresolved monitoring or screening person alerts",
+            "description": {
+              "content": "Deprecated. Decision rules should be used instead.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":id",
+                "unresolved-alerts"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) external ID of the person to check"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "e54cfe94-3da0-4ccc-8a62-0c7398dafeea",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":id",
+                    "unresolved-alerts"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) external ID of the person to check"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4c2324e2-4220-4098-932a-8f4bd3ca8098",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":id",
+                    "unresolved-alerts"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) external ID of the person to check"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b01600a3-fe60-4919-936b-b908d187d006",
+          "name": "Check for unresolved monitoring or screening transaction alerts",
+          "request": {
+            "name": "Check for unresolved monitoring or screening transaction alerts",
+            "description": {
+              "content": "Deprecated. Decision rules should be used instead.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "transactions",
+                ":id",
+                "unresolved-alerts"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) external ID of the transaction to check"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "b95fbd18-9a1e-49c9-a237-850999ae8ff8",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "transactions",
+                    ":id",
+                    "unresolved-alerts"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) external ID of the transaction to check"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6ed5feca-70c6-4da3-b28a-5411445a3c55",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "transactions",
+                    ":id",
+                    "unresolved-alerts"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) external ID of the transaction to check"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "app",
+      "key": "environment"
+    },
+    {
+      "type": "string",
+      "value": "https://{{environment}}.salv.com/api/",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "scope",
+        "value": "aml"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://app.salv.com/oauth/token"
+      },
+      {
+        "key": "grant_type",
+        "value": "client_credentials"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "9d7e030c-9364-403c-89f7-329d291213bd",
+    "name": "Salv AML alert unresolved-alerts API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "# Introduction\nWelcome to the Salv AML API documentation.\n\nThe Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.\n\nAPI definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml\n\n\nContact Support:\n Name: Support\n Email: support@salv.com",
+      "type": "text/plain"
+    }
+  }
+}

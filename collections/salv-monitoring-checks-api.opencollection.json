@@ -1,0 +1,73 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Salv AML alert monitoring-checks API",
+    "version": "1.0.9"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "client_credentials",
+      "accessTokenUrl": "https://app.salv.com/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "monitoring-checks",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Run real-time (ONLINE) person monitoring checks",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{environment}.salv.com/api/v1/persons/:personId/monitoring-checks",
+            "params": [
+              {
+                "name": "personId",
+                "value": "",
+                "type": "path",
+                "description": "ID of a person"
+              },
+              {
+                "name": "all-results",
+                "value": "",
+                "type": "query",
+                "description": "Return all results regardless of scenario score"
+              }
+            ]
+          },
+          "docs": "Run real-time (ONLINE) person monitoring checks"
+        },
+        {
+          "info": {
+            "name": "Run real-time (ONLINE) transaction monitoring checks",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{environment}.salv.com/api/v1/transactions/:transactionId/monitoring-checks",
+            "params": [
+              {
+                "name": "transactionId",
+                "value": "",
+                "type": "path",
+                "description": "ID of transaction"
+              }
+            ]
+          },
+          "docs": "Run real-time (ONLINE) transaction monitoring checks"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

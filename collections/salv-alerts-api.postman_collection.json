@@ -1,0 +1,279 @@
+{
+  "item": [
+    {
+      "id": "7ceef3a1-8fd2-4211-b93f-9090d92c7769",
+      "name": "alerts",
+      "description": {
+        "content": "Salv has multiple properties that are associated with individual alerts and influence alert management process based on their assignment. Using the initial alert ID and TYPE that are generated after different checks are triggered and communicated via API or WEBHOOKS, it is possible to programmatically modify these properties to streamline your business logic.\n\n**Attention:** To start using this API, the client id used for authentication needs to be created **after 16.05.2023**. If your integration currently uses credentials created before this date, you must create a NEW credentials pair, and replace the existing one.\n",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "6ec767ec-bbcd-4bce-b408-9000780afb32",
+          "name": "Update alert status",
+          "request": {
+            "name": "Update alert status",
+            "description": {
+              "content": "Updates specified alert status, optionally includes a note to go with the update.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "alerts",
+                "status"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "df35745e-f12b-41e9-a4dc-bd5cd9f619a6",
+              "name": "Successfully updated alert",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "alerts",
+                    "status"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "3a816382-6f61-499f-941c-419ade83726b",
+              "name": "Invalid data",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "alerts",
+                    "status"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "a1bbcc0a-ce9f-405c-9c45-0c0804d1eab0",
+              "name": "One or more invalid alert parameters provided: ID, TYPE, STATUS",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "alerts",
+                    "status"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "app",
+      "key": "environment"
+    },
+    {
+      "type": "string",
+      "value": "https://{{environment}}.salv.com/api/",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "scope",
+        "value": "aml"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://app.salv.com/oauth/token"
+      },
+      {
+        "key": "grant_type",
+        "value": "client_credentials"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "25235359-11f0-4b68-8dfb-543a84e84355",
+    "name": "Salv AML alert alerts API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "# Introduction\nWelcome to the Salv AML API documentation.\n\nThe Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.\n\nAPI definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml\n\n\nContact Support:\n Name: Support\n Email: support@salv.com",
+      "type": "text/plain"
+    }
+  }
+}

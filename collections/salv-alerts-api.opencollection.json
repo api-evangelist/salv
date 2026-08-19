@@ -1,0 +1,44 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Salv AML alert alerts API",
+    "version": "1.0.9"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "client_credentials",
+      "accessTokenUrl": "https://app.salv.com/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "alerts",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Update alert status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{environment}.salv.com/api/v1/alerts/status",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates specified alert status, optionally includes a note to go with the update."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

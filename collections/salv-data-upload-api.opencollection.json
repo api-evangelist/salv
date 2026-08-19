@@ -1,0 +1,77 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Salv AML alert data-upload API",
+    "version": "1.0.9"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "client_credentials",
+      "accessTokenUrl": "https://app.salv.com/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "data-upload",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Upload data from a CSV file",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{environment}.salv.com/api/v1/data-upload",
+            "params": [
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Which type of data to upload"
+              }
+            ],
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "file",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Upload a list of person, person relation, or transaction data in a CSV format. Files up to 100M are supported. File processing happens asynchronously."
+        },
+        {
+          "info": {
+            "name": "Get status of data upload",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{environment}.salv.com/api/v1/data-upload/:uploadId/status",
+            "params": [
+              {
+                "name": "uploadId",
+                "value": "",
+                "type": "path",
+                "description": "ID of data upload"
+              }
+            ]
+          },
+          "docs": "Get status of data upload"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

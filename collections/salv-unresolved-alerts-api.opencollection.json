@@ -1,0 +1,67 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Salv AML alert unresolved-alerts API",
+    "version": "1.0.9"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "client_credentials",
+      "accessTokenUrl": "https://app.salv.com/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "unresolved-alerts",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Check for unresolved monitoring or screening person alerts",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{environment}.salv.com/api/v1/persons/:id/unresolved-alerts",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "external ID of the person to check"
+              }
+            ]
+          },
+          "docs": "Deprecated. Decision rules should be used instead."
+        },
+        {
+          "info": {
+            "name": "Check for unresolved monitoring or screening transaction alerts",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{environment}.salv.com/api/v1/transactions/:id/unresolved-alerts",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "external ID of the transaction to check"
+              }
+            ]
+          },
+          "docs": "Deprecated. Decision rules should be used instead."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

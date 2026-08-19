@@ -1,0 +1,421 @@
+{
+  "item": [
+    {
+      "id": "9cf121fe-dced-4034-9ed7-73b0b53d5eed",
+      "name": "data-upload",
+      "description": {
+        "content": "## Steps to upload data using CSV\n1. Format the  csv file and add all the mandatory data fields indicated in the  [User Manual](https://help.salv.com/en/articles/154650-data-overview)\n\n2. Upload the [csv file via API](#tag/data-upload/operation/uploadData).  Note: the upload API response contains the id that will to be used in status check API call (step 3). \nWhen a data file has been successfully uploaded, an HTTP response with 202 status code is returned. A response with 202 status code indicates that the file has been uploaded successfully and the system will try to process the data. It does not guarantee that data will be successfully processed.\n\n      What will happen next?\n      1.  First comes the **validation phase**: \n          1. If the Schemas are added in the UI, then our system will validate the file against the schemas (e.g. if there is a field added with DATE type, then system will validate if the date format is correct)\n          2. If no Schemas are added in the UI, then our system will consider all fields as STRING\n\n          Note: during this validation phase we do not check if the transaction has been added to the system before. \n\n          3. If there are any errors, then no data will be uploaded. In this case calling [check status API call](#tag/data-upload/operation/getDataUploadStatus) will return FAILED status and a error message for the the first error encountered. The error message will be in the `reason` field in a human readable text. \n          4. If there are no errors, then the upload phase starts.\n\n      2. Second (if no errors occurred) comes the **upload phase**: our system will start uploading and saving data in batches of 1000, and in case of transaction file will check for duplicates and if the person is present in the system.  \n          1. If no errors occur, then the file is uploaded successfully.\n          2. If an error occurs, then when step no 3 ([check status API call](#tag/data-upload/operation/getDataUploadStatus)) is done, then: \n              1. system will show the first error and give the id of the person or transaction that caused the error. \n              2. system will show the id of the last uploaded person or transaction and the id of the first person or transaction that was not uploaded.\n\n              and, \n\n              3. the data following the last uploaded person or transaction will not be uploaded. \n      - Example:\n\n        > Csv file has 200 000 rows. There is a duplicate id on row 87 456.  In **validation phase** duplicate errors are not checked thus the file will move on to the **upload phase**. First 87 000 rows are uploaded without any errors. Rows starting from 87 001 will not get uploaded because there is a duplicate error in the batch (the patch of 1000 that gets checked). System will show that there is a duplicate, will show the id of the duplicate Person or Transaction and will show the last uploaded Person or Transaction id and the last id that was not added. \n\n        Example of an **upload phase** error message:\n\n        ```jsx\n        {\n            \"status\": \"PARTIALLY_COMPLETED\",\n            \"reason\": \"The upload appears to contain transactions (id ameio-1234567) that have already been added to Salv. Please make sure that your upload does not contain any duplicates or transactions that have already been added to Salv. The first transaction not added to Salv with this upload has id fmeio-1234567. Last processed and saved row was with id: dseio-1234567\"\n        }\n        ```\n\n3. In order to check the status of the file upload either use [get status of data upload API call](#tag/data-upload/operation/getDataUploadStatus) or check Data upload page on app.salv.com. This will provide the status and any further information about the errors.\n",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "8a830861-8f84-4f99-98c3-4ba9b4e75226",
+          "name": "Upload data from a CSV file",
+          "request": {
+            "name": "Upload data from a CSV file",
+            "description": {
+              "content": "Upload a list of person, person relation, or transaction data in a CSV format. Files up to 100M are supported. File processing happens asynchronously.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "data-upload"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "value",
+                  "value": "reference models.yaml#/components/schemas/ApiDataUploadType not found in the OpenAPI spec",
+                  "description": "(Required) Which type of data to upload"
+                }
+              ],
+              "variable": [
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "(Required) "
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "fa88107a-f4b1-41f4-833c-c016f32fdf60",
+              "name": "Data file accepted",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "data-upload"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "value",
+                      "value": "reference models.yaml#/components/schemas/ApiDataUploadType not found in the OpenAPI spec"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) ",
+                        "type": "text/plain"
+                      },
+                      "key": "file",
+                      "value": "<binary>",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "58867eaf-723d-474e-af2d-b6f00050809c",
+              "name": "Data file invalid",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "data-upload"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "value",
+                      "value": "reference models.yaml#/components/schemas/ApiDataUploadType not found in the OpenAPI spec"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "description": {
+                        "content": "(Required) ",
+                        "type": "text/plain"
+                      },
+                      "key": "file",
+                      "value": "<binary>",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "d517aa52-cf03-4cf1-896a-d19332b55876",
+          "name": "Get status of data upload",
+          "request": {
+            "name": "Get status of data upload",
+            "description": {},
+            "url": {
+              "path": [
+                "v1",
+                "data-upload",
+                ":uploadId",
+                "status"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<long>",
+                  "key": "uploadId",
+                  "description": "(Required) ID of data upload"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "ed4f572b-03a2-41e4-9244-5591ec516678",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "data-upload",
+                    ":uploadId",
+                    "status"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<long>",
+                      "key": "uploadId",
+                      "description": "(Required) ID of data upload"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "13512e84-9a46-4a02-9e16-59f4e993f768",
+              "name": "Data upload not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "data-upload",
+                    ":uploadId",
+                    "status"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<long>",
+                      "key": "uploadId",
+                      "description": "(Required) ID of data upload"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "app",
+      "key": "environment"
+    },
+    {
+      "type": "string",
+      "value": "https://{{environment}}.salv.com/api/",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "scope",
+        "value": "aml"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://app.salv.com/oauth/token"
+      },
+      {
+        "key": "grant_type",
+        "value": "client_credentials"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "44a6b3a9-c3a3-4f8a-b66e-b736381ef4a9",
+    "name": "Salv AML alert data-upload API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "# Introduction\nWelcome to the Salv AML API documentation.\n\nThe Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.\n\nAPI definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml\n\n\nContact Support:\n Name: Support\n Email: support@salv.com",
+      "type": "text/plain"
+    }
+  }
+}

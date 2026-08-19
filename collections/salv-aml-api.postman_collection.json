@@ -1,0 +1,3168 @@
+{
+  "item": [
+    {
+      "id": "987d3712-78f5-4a32-b77a-de5e49d05053",
+      "name": "aml",
+      "description": {
+        "content": "This section contains all operations managing the state of persons and transactions.\n\nThere are three endpoints for creating or modifying a person, make sure to choose the right one for your task:\n* [Create new person](#tag/aml/operation/addPersonV2) will create a new person if a person with the same ID does not already exist in our system. \n* [Patch person](#tag/aml/operation/patchPersonV2) partially updates an existing person if this person exists in the system. A request to this endpoint will only update or add \nattributes which are provided in the request. Use this endpoint to update selected \nattributes of a person or to add new attributes without changing attributes not present in the request payload. This endpoint may also be used to update person type.\n* [Update person](#tag/aml/operation/updatePersonV2) updates an existing person if this person exists in the system. A request to this endpoint must contain both person type and attributes. \nA request to this endpoint overwrites both person type and attributes with the values given in the request.\n\nID of a person or a transaction is a case-sensitive text field in our system. Salv does not transform the ID in any way. Only the following characters are allowed: Alphanumerics `a-zA-Z0-9`, hyphens `-`, underscores `_`, colons `:`, dots `.`.\n\nAll requests must use ISO-8601 formatted timestamps. That includes defined fields (e.g. timestamp property in \"Create new transaction\" request) and custom key-value pairs (e.g. under attributes property in \"Create new person\" request).\n\nFor any data passed in person or transaction objects, the keys must adhere to the following rules:  \n- It must not contain a \"**.**\"\n- It must not consist of whitespaces\n\n## Example: Uploading person and transaction\nThis example shows how to upload data to use it later for monitoring or screening.\n\n### 1. Add a person if not already added\nAdd a new person, according to the documentation at [addPerson(POST)](#operation/addPersonV2).\n\nIf the person has already been added to Salv, then skip this step.\n\n#### With cURL\n```\ncurl --request POST \\\n  --url https://app.salv.com/api/v2/persons \\\n  --header 'Authorization: Bearer {yourBearerToken}' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}'\n```\n\n#### With Python Requests\n```\nimport requests\n\nurl = \"https://app.salv.com/api/v2/persons\"\n\npayload = {\n    \"id\": \"bbt12345\",\n    \"type\": \"INDIVIDUAL\",\n    \"attributes\": {\n        \"first_name\": \"Sheldon\",\n        \"last_name\": \"Cooper\",\n        \"dob\": \"1983-05-12\",\n        \"city\": \"Pasadena\",\n        \"street_address\": \"2311 North Los Robles Avenue\",\n        \"country\": \"US\",\n        \"onboarding_date\": \"2019-04-16\",\n        \"email\": \"sheldon.cooper@gmail.com\",\n        \"phone_number\": \"+1582693582\",\n        \"id_document\": \"passport\",\n        \"id_country\": \"US\",\n        \"gender\": \"F\"\n    }\n}\nheaders = {\n    \"Content-Type\": \"application/json\",\n    \"Authorization\": \"{yourBearerToken}\"\n}\n\nresponse = requests.request(\"POST\", url, json=payload, headers=headers)\n\nprint(response.text)\n```\n### 2. Add a transaction\nAdd a new transaction, according to the documentation at [addTransaction(POST)](#operation/addTransaction).\n\n#### With cURL\n```\ncurl --request POST \\\n  --url https://app.salv.com/api/v1/persons/bbt12345/transactions \\\n  --header 'Authorization: Bearer {yourBearerToken}' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n  \"id\": \"aeio-1234567\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39.000Z\"\n  }\n}'\n```\n\n#### With Python Requests\n```\nimport requests\n\nurl = \"https://app.salv.com/api/v1/persons/bbt12345/transactions\"\n\npayload = {\n    \"id\": \"aeio-1234567\",\n    \"attributes\": {\n        \"sender_name\": \"Sheldon Cooper\",\n        \"sender_account\": \"GB123456789\",\n        \"receiver_name\": \"Leonard Hofstadter\",\n        \"receiver_account\": \"DE987654321\",\n        \"amount\": \"15678.34\",\n        \"type\": \"wire_transfer\",\n        \"direction\": \"I\",\n        \"timestamp\": \"2022-01-20T08:48:39.000Z\"\n    }\n}\nheaders = {\n    \"Content-Type\": \"application/json\",\n    \"Authorization\": \"{yourBearerToken}\"\n}\n\nresponse = requests.request(\"POST\", url, json=payload, headers=headers)\n\nprint(response.text)\n```\n",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "1de7db23-897c-42a8-bce7-0951db179e48",
+          "name": "Create new person",
+          "request": {
+            "name": "Create new person",
+            "description": {
+              "content": "Attributes supported maximum nesting depth is 2.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v2",
+                "persons"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "7c4a8433-73f3-4a75-8ec8-ba499ead6cc6",
+              "name": "Created person",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16T11:10:55.123456Z\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "c6b0014f-a64f-45e5-bd35-2b1e7650ed7a",
+              "name": "Bad request",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16T11:10:55.123456Z\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "e8d14f19-9e54-4777-89ba-c239519ab887",
+              "name": "Unauthorized",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16T11:10:55.123456Z\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "1073f7f2-d7c5-4513-b1c9-0cc164ecac32",
+              "name": "Person exists",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16T11:10:55.123456Z\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "13682f89-666f-48a5-bcbd-0079bda0509b",
+          "name": "Fetch all persons",
+          "request": {
+            "name": "Fetch all persons",
+            "description": {},
+            "url": {
+              "path": [
+                "v2",
+                "persons",
+                "search"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "9a55ddab-bcf8-4728-be8f-1446e36f2efe",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "ed29a570-37de-48d7-a978-e39cbe7b33cd",
+          "name": "Patch person",
+          "request": {
+            "name": "Patch person",
+            "description": {
+              "content": "Partial person update. Only attributes present in request will be added/updated. Attributes supported maximum\nnesting depth is 2.\n\nThis endpoint also supports optional person type update.\n\nIn case the operation is successful there will be an empty response.\n\n### Examples\n#### cURL\n```\n$ curl --request PATCH \\\n  --url https://app.salv.com/api/v2/persons/{personId} \\\n  --header 'Authorization: Bearer {yourBearerToken}' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"type\": \"LEGAL\",\n    \"attributes\": {\n      \"company_name\": \"Best Vacuum Cleaning Ltd.\"\n    }\n  }'\n```\n\n#### With Python Requests\n```\nimport requests\n\npayload = {\n  \"attributes\": {\n    \"phone_number\": \"(198)747-8241x9209\",\n    \"shareholders\": [{\n      \"id\": 1,\n      \"name\": \"Rose Doe\",\n      \"dob\": \"1970-01-01\",\n      \"email\": \"rose.doe@gmail.com\"\n    }]\n  }\n}\n\nresponse = requests.post(\n   'https://app.salv.com/api/v2/persons/{personId}',\n   auth = ({clientId}, {clientSecret}),\n   json = payload)\n\nresponse.raise_for_status()\n```\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v2",
+                "persons",
+                ":personId"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) External unique person ID"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "98e54fb1-1ed8-491d-9392-1e35d499ff3e",
+              "name": "Successfully updated person",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) External unique person ID"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"attributes\": {\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-01-01\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "e26ee091-0603-4b71-bd97-2744d3a4ea11",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) External unique person ID"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"attributes\": {\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-01-01\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "9e5d154e-faee-43de-95ce-d9c2c8b575c6",
+              "name": "Unauthorized",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) External unique person ID"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"attributes\": {\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-01-01\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "eb787052-e6b3-4f36-8ac6-d7713d91d03e",
+              "name": "Person not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) External unique person ID"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"attributes\": {\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-01-01\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "86fb9d12-5d4e-4a76-9709-9ab9c786d3a8",
+          "name": "Update person",
+          "request": {
+            "name": "Update person",
+            "description": {
+              "content": "Person update. Attributes in the request will be used to replace existing ones and type will be updated. \nAttributes supported maximum nesting depth is 2.\n\nIn case the operation is successful there will be an empty response.\n\n### Examples\n#### cURL\n```\n$ curl --request PUT \\\n  --url https://app.salv.com/api/v2/persons/{personId} \\\n  --header 'Authorization: Bearer {yourBearerToken}' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"type\": \"LEGAL\",\n    \"attributes\": {\n      \"company_name\": \"Best Vacuum Cleaning Ltd.\"\n    }\n  }'\n```\n\n#### With Python Requests\n```\nimport requests\n\npayload = {\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"phone_number\": \"(198)747-8241x9209\",\n    \"shareholders\": [{\n      \"id\": 1,\n      \"name\": \"Rose Doe\",\n      \"dob\": \"1970-01-01\",\n      \"email\": \"rose.doe@gmail.com\"\n    }]\n  }\n}\n\nresponse = requests.post(\n   'https://app.salv.com/api/v2/persons/{personId}',\n   auth = ({clientId}, {clientSecret}),\n   json = payload)\n\nresponse.raise_for_status()\n```\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v2",
+                "persons",
+                ":personId"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) External unique person ID"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "5d3787a9-a7d2-4cf6-a04f-463d0dd9fb04",
+              "name": "Updated person",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) External unique person ID"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-01-01\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "4e60a768-729b-44f6-bdf0-213843616fd3",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) External unique person ID"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-01-01\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "dece4860-5405-400b-a5bd-80d53b378d5a",
+              "name": "Unauthorized",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) External unique person ID"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-01-01\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "5209899b-ba2d-4524-a816-44a3cb573c3a",
+              "name": "Person not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v2",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) External unique person ID"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"last_name\": \"Doe\",\n    \"dob\": \"1970-01-01\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "fefcdaa2-cd03-4ac8-b432-b62bef9ddfda",
+          "name": "Fetch all persons",
+          "request": {
+            "name": "Fetch all persons",
+            "description": {
+              "content": "NB! If there are more than 10000 results then the API shows the number of total results as 10000 and you can't paginate past the 10000th result.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "persons"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "attribute",
+                  "value": "<string>",
+                  "description": "Search query attribute"
+                },
+                {
+                  "disabled": false,
+                  "key": "category",
+                  "value": "<string>",
+                  "description": "Person category"
+                }
+              ],
+              "variable": [
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "d96d018e-8210-4952-b3d9-6a3f036c798f",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "attribute",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "category",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"number\": 0,\n  \"size\": 20,\n  \"total\": 1,\n  \"content\": [\n    {\n      \"id\": \"bbt12345\",\n      \"type\": \"INDIVIDUAL\",\n      \"attributes\": {\n        \"first_name\": \"Sheldon\",\n        \"last_name\": \"Cooper\",\n        \"dob\": \"1983-05-12\",\n        \"city\": \"Pasadena\",\n        \"street_address\": \"2311 North Los Robles Avenue\",\n        \"country\": \"US\",\n        \"onboarding_date\": \"2019-04-16\",\n        \"email\": \"sheldon.cooper@gmail.com\",\n        \"phone_number\": \"+1582693582\",\n        \"id_document\": \"passport\",\n        \"id_country\": \"US\",\n        \"gender\": \"F\"\n      },\n      \"status\": \"NEW\",\n      \"createdTime\": \"2019-08-24T14:15:22Z\",\n      \"snoozeConfiguration\": {\n        \"id\": 1,\n        \"personId\": 1,\n        \"createdBy\": {\n          \"id\": 1,\n          \"email\": \"dana.aml@starbank.com\",\n          \"name\": \"Dana Cummings\"\n        },\n        \"createdTime\": \"2019-08-24T14:15:22Z\",\n        \"endTime\": \"2019-08-24T14:15:22Z\",\n        \"amount\": 0,\n        \"totalAmount\": 0,\n        \"note\": {}\n      },\n      \"category\": \"CUSTOMER\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "5d345729-eb60-4f65-a8b9-a37aec474b7d",
+          "name": "Create new person (v1)",
+          "request": {
+            "name": "Create new person (v1)",
+            "description": {
+              "content": "Use [Create new person v2](#tag/aml/operation/addPersonV2) instead.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "persons"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "bebc0724-a4c7-431d-9ec6-5fe47c9182cc",
+              "name": "Created person",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16T11:10:55.123456Z\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "48d0eb85-a319-47f3-80b2-796e51276bfc",
+              "name": "Bad request",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/text"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16T11:10:55.123456Z\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/text"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "b0ef7eb0-b102-41ac-b315-f779efa6769f",
+              "name": "Unauthorized",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/text"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16T11:10:55.123456Z\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/text"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "6559180f-0e32-496c-84eb-4d5670c7323a",
+              "name": "Person exists",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/text"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16T11:10:55.123456Z\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/text"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "d296e4e8-89ac-4608-b5c2-fac40154583b",
+          "name": "Fetch person by id",
+          "request": {
+            "name": "Fetch person by id",
+            "description": {},
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":personId"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) ID of person to return"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "4e0237fa-44e3-4788-9fed-8be2b8d561fc",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person to return"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  },\n  \"status\": \"NEW\",\n  \"createdTime\": \"2019-08-24T14:15:22Z\",\n  \"snoozeConfiguration\": {\n    \"id\": 1,\n    \"personId\": 1,\n    \"createdBy\": {\n      \"id\": 1,\n      \"email\": \"dana.aml@starbank.com\",\n      \"name\": \"Dana Cummings\"\n    },\n    \"createdTime\": \"2019-08-24T14:15:22Z\",\n    \"endTime\": \"2019-08-24T14:15:22Z\",\n    \"amount\": 0,\n    \"totalAmount\": 0,\n    \"note\": {}\n  },\n  \"category\": \"CUSTOMER\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ef8f9cc5-75d8-4b80-ac2c-dbd1ba1a9b9f",
+              "name": "Invalid ID supplied",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person to return"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "b200ef9b-40a4-47e5-910d-f717eb254792",
+              "name": "Person not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person to return"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "5f30078b-3795-404d-8791-6520209f5f04",
+          "name": "Patch person (v1)",
+          "request": {
+            "name": "Patch person (v1)",
+            "description": {
+              "content": "Use [Patch person v2](#tag/aml/operation/patchPersonV2) instead.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":personId"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) ID of person to return"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "f0ec7773-06e4-4eda-9508-db0003c8fab9",
+              "name": "Updated person",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person to return"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ff23c77c-4239-429e-801e-614b865162ca",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person to return"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "98fd8b12-7bc6-4d3d-a874-4b47af872f38",
+          "name": "Fetch all person transactions",
+          "request": {
+            "name": "Fetch all person transactions",
+            "description": {
+              "content": "NB! If there are more than 10000 results then the API shows the number of total results as 10000 and you can't paginate past the 10000th result.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":personId",
+                "transactions"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) ID of person"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "0df60572-1ab5-41d9-8347-bf4971dad211",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "f658da7d-4f0a-4e3c-9d92-d278c4a056ec",
+          "name": "Create new transaction",
+          "request": {
+            "name": "Create new transaction",
+            "description": {},
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":personId",
+                "transactions"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) ID of person"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "d29aabca-a630-47ac-a64f-96dc5167718a",
+              "name": "Created transaction",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"aeio-1234567\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39Z\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"aeio-1234567\",\n  \"personId\": \"bbt12345\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5ff0e7f8-543c-4ad2-96a4-e62ed90ea602",
+              "name": "Bad request",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/text"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"aeio-1234567\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39Z\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/text"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "ea6702e8-0c4e-47f3-b822-8d87cc085958",
+              "name": "Unauthorized",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/text"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"aeio-1234567\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39Z\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/text"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "d2e0aa3e-fb8d-4d7f-86e0-76eefb7c4db7",
+              "name": "Person not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/text"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"aeio-1234567\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39Z\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/text"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "c5122968-b3f2-45df-94e7-f058a076a91e",
+              "name": "Transaction exists",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/text"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"aeio-1234567\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39Z\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/text"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e405809d-5990-4e6b-8b04-d34980501258",
+          "name": "Fetch transaction by id",
+          "request": {
+            "name": "Fetch transaction by id",
+            "description": {},
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":personId",
+                "transactions",
+                ":transactionId"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) ID of person"
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "transactionId",
+                  "description": "(Required) ID of transaction to return"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "8b66a294-6a75-4507-823e-2ff511a8df50",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions",
+                    ":transactionId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "transactionId",
+                      "description": "(Required) ID of transaction to return"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": \"aeio-1234567\",\n  \"personId\": \"bbt12345\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1f7e24f6-9efd-420c-a67a-56373193ea50",
+              "name": "Invalid ID supplied",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions",
+                    ":transactionId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "transactionId",
+                      "description": "(Required) ID of transaction to return"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "1bf4953a-43a8-4d69-9e1b-492793d45e31",
+              "name": "Person or Transaction not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions",
+                    ":transactionId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "transactionId",
+                      "description": "(Required) ID of transaction to return"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "533c443a-6063-4d1a-a393-232128f069ce",
+          "name": "Update transaction",
+          "request": {
+            "name": "Update transaction",
+            "description": {
+              "content": "Updates transaction. Currently status is the only attribute that can be updated.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":personId",
+                "transactions",
+                ":transactionId"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) ID of person"
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "transactionId",
+                  "description": "(Required) ID of transaction"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "1dce4e28-3b48-4315-a78a-41469ac9b305",
+              "name": "Updated transaction",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions",
+                    ":transactionId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "transactionId",
+                      "description": "(Required) ID of transaction"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "bac5cc9f-67ad-43be-baf4-d9d1d767b295",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions",
+                    ":transactionId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "transactionId",
+                      "description": "(Required) ID of transaction"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "ad21ab4d-c528-4568-81ae-7f83362f2295",
+              "name": "Person or Transaction not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "transactions",
+                    ":transactionId"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "transactionId",
+                      "description": "(Required) ID of transaction"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e4446897-2b8f-4d6a-86e3-6336cc91bb71",
+          "name": "Fetch history of status changes for the person",
+          "request": {
+            "name": "Fetch history of status changes for the person",
+            "description": {},
+            "url": {
+              "path": [
+                "v1",
+                "persons",
+                ":personId",
+                "statuses"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "personId",
+                  "description": "(Required) ID of person"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "bde52f50-7498-4b81-a92f-517d589a3bfd",
+              "name": "successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "statuses"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1ab62e24-04cc-43c6-b2ec-ff1c41009333",
+              "name": "Invalid ID supplied",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "statuses"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "0f69abb1-52c9-4251-b1d5-a1174464b0a0",
+              "name": "Person not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "persons",
+                    ":personId",
+                    "statuses"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "personId",
+                      "description": "(Required) ID of person"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "app",
+      "key": "environment"
+    },
+    {
+      "type": "string",
+      "value": "https://{{environment}}.salv.com/api/",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "scope",
+        "value": "aml"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://app.salv.com/oauth/token"
+      },
+      {
+        "key": "grant_type",
+        "value": "client_credentials"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "40547ed8-f4d5-4c44-8ba1-44edf99d227a",
+    "name": "Salv alert aml API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "# Introduction\nWelcome to the Salv AML API documentation.\n\nThe Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.\n\nAPI definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml\n\n\nContact Support:\n Name: Support\n Email: support@salv.com",
+      "type": "text/plain"
+    }
+  }
+}

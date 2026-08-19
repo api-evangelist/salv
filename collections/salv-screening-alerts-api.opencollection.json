@@ -1,0 +1,48 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Salv AML alert screening-alerts API",
+    "version": "1.0.9"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "client_credentials",
+      "accessTokenUrl": "https://app.salv.com/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "screening-alerts",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get screening alert hits",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{environment}.salv.com/api/v1/screening-alerts/:screeningAlertId/hits",
+            "params": [
+              {
+                "name": "screeningAlertId",
+                "value": "",
+                "type": "path",
+                "description": "ID of the screening alert for which to return hits"
+              }
+            ]
+          },
+          "docs": "Returns paginated list of screening alert hits by alert id"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

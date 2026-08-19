@@ -2,10 +2,8 @@ generated: '2026-07-21'
 method: derived
 status: candidate
 source: openapi/salv-aml-openapi-original.yml
-note: >-
-  No official hosted/remote MCP server was found for Salv. This is a derived
-  candidate tool list, one tool per OpenAPI operation, as a starting point for
-  an MCP wrapper over the Salv AML API.
+note: No official hosted/remote MCP server was found for Salv. This is a derived candidate tool list,
+  one tool per OpenAPI operation, as a starting point for an MCP wrapper over the Salv AML API.
 server:
   name: salv-aml
   transport: http
@@ -67,3 +65,9 @@ tools:
 - name: get_data_upload_status
   description: Poll the status of a bulk data upload.
   source_operation: openapi/salv-aml-openapi-original.yml#getDataUploadStatus
+deployment:
+  mode: none
+  verified: derived
+  tools: 19
+  checked: '2026-08-12'
+  source: catalog MCP census

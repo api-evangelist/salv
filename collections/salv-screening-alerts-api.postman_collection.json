@@ -1,0 +1,282 @@
+{
+  "item": [
+    {
+      "id": "7bbd94a7-f8d6-435d-80c3-821d6d8b257e",
+      "name": "screening-alerts",
+      "description": {
+        "content": "Screening alert is created when a particular field of a particular person matches against one of the screening lists. Screening alert has a list of hits, each of which represent one matched record from screening list. Some of the hits can be cleared automatically according to the configured clearance rules and goodlists.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "5459cacd-4e18-47fb-b57d-24862a54a5ac",
+          "name": "Get screening alert hits",
+          "request": {
+            "name": "Get screening alert hits",
+            "description": {
+              "content": "Returns paginated list of screening alert hits by alert id",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "screening-alerts",
+                ":screeningAlertId",
+                "hits"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<long>",
+                  "key": "screeningAlertId",
+                  "description": "(Required) ID of the screening alert for which to return hits"
+                },
+                {
+                  "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                  "type": "any",
+                  "value": "{{environment}}",
+                  "key": "environment"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "3014cd37-7ffd-413e-907b-97064ed7421b",
+              "name": "Successful operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "screening-alerts",
+                    ":screeningAlertId",
+                    "hits"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<long>",
+                      "key": "screeningAlertId",
+                      "description": "(Required) ID of the screening alert for which to return hits"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"number\": 0,\n  \"size\": 1,\n  \"total\": 1,\n  \"content\": [\n    {\n      \"id\": \"sdf12345\",\n      \"listName\": \"Special Interest Person (SIP)\",\n      \"listProvider\": \"DOW_JONES\",\n      \"listType\": \"ADVERSE_MEDIA\",\n      \"score\": 98,\n      \"attributes\": {\n        \"aliases\": \"Lingjia Huang~Ling-Chia Huang~Ling Chia Huang~Ling Jia Huang\",\n        \"associations\": [\n          {\n            \"association\": {\n              \"associateId\": \"4286543\",\n              \"ex\": false,\n              \"name\": \"Siou-Yue Jheng\",\n              \"relationship\": \"Associated Special Interest Person\",\n              \"type\": \"PublicFigure\"\n            },\n            \"roles\": []\n          }\n        ],\n        \"descriptions\": {\n          \"Description1\": \"Special Interest Person (SIP)\",\n          \"Description2\": \"Financial Crime\"\n        },\n        \"identificationDetails\": {\n          \"HM Treasury Group ID\": \"7584\",\n          \"SECO SSID\": \"1147\",\n          \"OFAC Unique ID\": \"7847\",\n          \"OFAC Program ID\": \"IRAQ2\",\n          \"DFAT Reference Number\": \"653\",\n          \"EU Sanctions Programme Indicator\": \"IRQ\",\n          \"UN Permanent Reference No.\": \"IQi.005\",\n          \"EU Consolidated Electronic List ID\": \"29\"\n        },\n        \"mainList\": \"Special Interest Person (SIP)\",\n        \"referenceGroupCodes\": [\n          \"EUCON\",\n          \"OFACAIS\"\n        ],\n        \"providers\": [\n          \"EU\",\n          \"US-OFAC\"\n        ],\n        \"name\": \"Ling-Jia Huang\",\n        \"notes\": \"Keywords: tax evasion\\nPeople mentioned: Huang Ling-Jia, Jheng Jing-Tai\\nCompanies mentioned: Toki Choi\\nProfile:\\nHuang Ling-Jia, an accountant with internet fashion retailer Toki Choi, was one of 11 individuals given a suspended indictment and ordered to pay between TWD 10,000 and TWD 800,000 to the national treasury by the Taipei District Prosecutors Office on May 6, 2015, for their roles in helping Toki Choi chairman Jheng Jing-Tai to evade TWD 13.25m in company taxes.\",\n        \"overview\": \"{\\\"id\\\":\\\"4286548\\\",\\\"properties\\\":{\\\"name\\\":[\\\"Ling-Jia Huang\\\"],\\\"aliases\\\":[\\\"Lingjia Huang\\\",\\\"Ling-Chia Huang\\\",\\\"Ling Chia Huang\\\",\\\"Ling Jia Huang\\\"],\\\"Citizenship\\\":[\\\"Taiwan\\\"],\\\"Country of Reported Allegation\\\":[\\\"Taiwan\\\"],\\\"Resident of\\\":[\\\"Taiwan\\\"],\\\"gender\\\":\\\"Female\\\",\\\"deceased\\\":\\\"No\\\"},\\\"referenceCodes\\\":null,\\\"recordDate\\\":\\\"2015-05-31T00:00:00\\\",\\\"type\\\":\\\"PERSON\\\",\\\"descriptions\\\":{\\\"Description1\\\":\\\"Special Interest Person (SIP)\\\",\\\"Description2\\\":\\\"Financial Crime\\\"},\\\"activeStatus\\\":\\\"Active\\\"}\",\n        \"recordDate\": 1433019600,\n        \"roles\": [\n          {\n            \"occupation\": \"International Sporting Organisation Officials\",\n            \"sinceDay\": \"17\",\n            \"sinceMonth\": \"Apr\",\n            \"sinceYear\": \"1960\",\n            \"title\": \"Alternate Member, Board of Directors, European Investment Bank (EIB)\",\n            \"toDay\": null,\n            \"toMonth\": null,\n            \"toYear\": null,\n            \"type\": \"Primary Occupation\"\n          }\n        ],\n        \"type\": \"PERSON\"\n      }\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7b8f0456-3a7b-4c75-931c-20336dbd566a",
+              "name": "Invalid input",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "screening-alerts",
+                    ":screeningAlertId",
+                    "hits"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<long>",
+                      "key": "screeningAlertId",
+                      "description": "(Required) ID of the screening alert for which to return hits"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "782b5a2e-4ab3-4466-a33b-1a0601794ac0",
+              "name": "Screening alert not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "screening-alerts",
+                    ":screeningAlertId",
+                    "hits"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<long>",
+                      "key": "screeningAlertId",
+                      "description": "(Required) ID of the screening alert for which to return hits"
+                    },
+                    {
+                      "description": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+                      "type": "any",
+                      "value": "{{environment}}",
+                      "key": "environment"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "Select environment:\n* `app` - Production\n* `demo` - Sandbox\n (This can only be one of app,demo)",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "app",
+      "key": "environment"
+    },
+    {
+      "type": "string",
+      "value": "https://{{environment}}.salv.com/api/",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "scope",
+        "value": "aml"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://app.salv.com/oauth/token"
+      },
+      {
+        "key": "grant_type",
+        "value": "client_credentials"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "c384f899-08e1-422b-80c4-1be383a2bba6",
+    "name": "Salv AML alert screening-alerts API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "# Introduction\nWelcome to the Salv AML API documentation.\n\nThe Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.\n\nAPI definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml\n\n\nContact Support:\n Name: Support\n Email: support@salv.com",
+      "type": "text/plain"
+    }
+  }
+}
