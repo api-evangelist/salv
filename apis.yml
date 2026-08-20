@@ -50,6 +50,8 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
+  - Alert
+  tags_raw:
   - alert
   properties:
   - type: OpenAPI
@@ -69,6 +71,8 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
+  - Alerts
+  tags_raw:
   - alerts
   properties:
   - type: OpenAPI
@@ -130,6 +134,8 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
+  - AML
+  tags_raw:
   - aml
   properties:
   - type: OpenAPI
@@ -214,6 +220,8 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
+  - Data Upload
+  tags_raw:
   - data-upload
   properties:
   - type: OpenAPI
@@ -268,6 +276,8 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
+  - Note
+  tags_raw:
   - note
   properties:
   - type: OpenAPI
@@ -287,6 +297,8 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
+  - Risk
+  tags_raw:
   - risk
   properties:
   - type: OpenAPI
