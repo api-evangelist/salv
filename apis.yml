@@ -231,7 +231,7 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
-  - data-upload
+  - Data Upload
   tags_raw:
   - data-upload
   properties:
@@ -308,7 +308,7 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
-  - risk
+  - Risk
   tags_raw:
   - risk
   properties:
