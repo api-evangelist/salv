@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: Salv AML alert data-upload API
+  title: Salv AML Data Upload API
   description: '# Introduction
 
     Welcome to the Salv AML API documentation.
@@ -9,9 +9,7 @@ info:
     The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
 
 
-    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
-
-    '
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml'
   version: 1.0.9
   contact:
     name: Support
@@ -38,14 +36,16 @@ security:
 - OAuth2:
   - aml
 tags:
-- name: data-upload
+- name: Data Upload
   x-displayName: Data upload from CSV
-  description: "## Steps to upload data using CSV\n1. Format the  csv file and add all the mandatory data fields indicated in the  [User Manual](https://help.salv.com/en/articles/154650-data-overview)\n\n2. Upload the [csv file via API](#tag/data-upload/operation/uploadData).  Note: the upload API response contains the id that will to be used in status check API call (step 3). \nWhen a data file has been successfully uploaded, an HTTP response with 202 status code is returned. A response with 202 status code indicates that the file has been uploaded successfully and the system will try to process the data. It does not guarantee that data will be successfully processed.\n\n      What will happen next?\n      1.  First comes the **validation phase**: \n          1. If the Schemas are added in the UI, then our system will validate the file against the schemas (e.g. if there is a field added with DATE type, then system will validate if the date format is correct)\n          2. If no Schemas are added in the UI, then our system will consider all fields as STRING\n\n          Note: during this validation phase we do not check if the transaction has been added to the system before. \n\n          3. If there are any errors, then no data will be uploaded. In this case calling [check status API call](#tag/data-upload/operation/getDataUploadStatus) will return FAILED status and a error message for the the first error encountered. The error message will be in the `reason` field in a human readable text. \n          4. If there are no errors, then the upload phase starts.\n\n      2. Second (if no errors occurred) comes the **upload phase**: our system will start uploading and saving data in batches of 1000, and in case of transaction file will check for duplicates and if the person is present in the system.  \n          1. If no errors occur, then the file is uploaded successfully.\n          2. If an error occurs, then when step no 3 ([check status API call](#tag/data-upload/operation/getDataUploadStatus)) is done, then: \n              1. system will show the first error and give the id of the person or transaction that caused the error. \n              2. system will show the id of the last uploaded person or transaction and the id of the first person or transaction that was not uploaded.\n\n              and, \n\n              3. the data following the last uploaded person or transaction will not be uploaded. \n      - Example:\n\n        > Csv file has 200 000 rows. There is a duplicate id on row 87 456.  In **validation phase** duplicate errors are not checked thus the file will move on to the **upload phase**. First 87 000 rows are uploaded without any errors. Rows starting from 87 001 will not get uploaded because there is a duplicate error in the batch (the patch of 1000 that gets checked). System will show that there is a duplicate, will show the id of the duplicate Person or Transaction and will show the last uploaded Person or Transaction id and the last id that was not added. \n\n        Example of an **upload phase** error message:\n\n        ```jsx\n        {\n            \"status\": \"PARTIALLY_COMPLETED\",\n            \"reason\": \"The upload appears to contain transactions (id ameio-1234567) that have already been added to Salv. Please make sure that your upload does not contain any duplicates or transactions that have already been added to Salv. The first transaction not added to Salv with this upload has id fmeio-1234567. Last processed and saved row was with id: dseio-1234567\"\n        }\n        ```\n\n3. In order to check the status of the file upload either use [get status of data upload API call](#tag/data-upload/operation/getDataUploadStatus) or check Data upload page on app.salv.com. This will provide the status and any further information about the errors.\n"
+  description: '## Steps to upload data using CSV
+
+    1.'
 paths:
   /v1/data-upload:
     post:
       tags:
-      - data-upload
+      - Data Upload
       summary: Upload data from a CSV file
       description: Upload a list of person, person relation, or transaction data in a CSV format. Files up to 100M are supported. File processing happens asynchronously.
       operationId: uploadData
@@ -79,7 +79,7 @@ paths:
   /v1/data-upload/{uploadId}/status:
     get:
       tags:
-      - data-upload
+      - Data Upload
       summary: Get status of data upload
       operationId: getDataUploadStatus
       parameters:

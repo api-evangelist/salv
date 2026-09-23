@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: Salv AML alert monitoring-checks API
+  title: Salv AML Monitoring Checks API
   description: '# Introduction
 
     Welcome to the Salv AML API documentation.
@@ -9,9 +9,7 @@ info:
     The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
 
 
-    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
-
-    '
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml'
   version: 1.0.9
   contact:
     name: Support
@@ -39,18 +37,7 @@ security:
   - aml
 tags:
 - name: monitoring-checks
-  description: 'Person & Transaction monitoring.
-
-
-    Real-time (ONLINE) scenarios should be used when an alert created by the scenario should block the transaction. [Example: Real-time (pre-processing) transaction monitoring](#tag/monitoring-overview/Example:-Real-time-(pre-processing)-transaction-monitoring)
-
-
-    Post-event (OFFLINE) scenarios should be used when an alert created should NOT block the transaction. [Example: Simple integration](#tag/aml/Example:-Uploading-person-and-transaction)
-
-
-    In the rare occasion that a monitoring check fails with error code 500, the transaction should be blocked. In that case Salv has not been able to verify that the transaction is safe to process.
-
-    '
+  description: Person & Transaction monitoring.
   x-displayName: Monitoring checks
 paths:
   /v1/persons/{personId}/monitoring-checks:

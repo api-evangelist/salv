@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: Salv AML alert screening-list-groups API
+  title: Salv AML Screening List Groups API
   description: '# Introduction
 
     Welcome to the Salv AML API documentation.
@@ -9,9 +9,7 @@ info:
     The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
 
 
-    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
-
-    '
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml'
   version: 1.0.9
   contact:
     name: Support
@@ -39,7 +37,7 @@ security:
   - aml
 tags:
 - name: screening-list-groups
-  description: Screening selectors can be used in screening search. These can be used in [Screening search](#tag/screening-searches/operation/search)
+  description: Screening selectors can be used in screening search. These can be used in Screening search
   x-displayName: Screening selectors
 paths:
   /v1/screening-list-groups:

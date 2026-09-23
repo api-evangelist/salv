@@ -1,21 +1,7 @@
 {
   "provider": "salv",
   "sources": [
-    "salv-alert-api-openapi.yml",
-    "salv-alerts-api-openapi.yml",
-    "salv-aml-api-openapi.yml",
-    "salv-custom-list-record-api-openapi.yml",
-    "salv-custom-list-usable-field-public-api-openapi.yml",
-    "salv-data-upload-api-openapi.yml",
-    "salv-manual-alerts-api-openapi.yml",
-    "salv-monitoring-checks-api-openapi.yml",
-    "salv-note-api-openapi.yml",
-    "salv-risk-api-openapi.yml",
-    "salv-screening-alerts-api-openapi.yml",
-    "salv-screening-checks-api-openapi.yml",
-    "salv-screening-list-groups-api-openapi.yml",
-    "salv-screening-searches-api-openapi.yml",
-    "salv-unresolved-alerts-api-openapi.yml"
+    "_original/salv-aml-openapi-original.yml"
   ],
   "outputs": [
     "salv-alert-api-openapi.yml",
@@ -37,6 +23,26 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "salv-aml-openapi-original.yml: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "salv-alert-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-alerts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-aml-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-custom-list-record-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-custom-list-usable-field-public-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-data-upload-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-manual-alerts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-monitoring-checks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-note-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-risk-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-screening-alerts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-screening-checks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-screening-list-groups-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-screening-searches-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "salv-unresolved-alerts-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

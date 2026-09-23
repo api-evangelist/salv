@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: Salv alert aml API
+  title: Salv Aml API
   description: '# Introduction
 
     Welcome to the Salv AML API documentation.
@@ -9,9 +9,7 @@ info:
     The Salv API is built on HTTP. Our API is RESTful. It has predictable resource URLs. It returns HTTP response codes to indicate errors. It also accepts and returns JSON in the HTTP body. You can use your favorite HTTP/REST library for your programming language to use Salv API.
 
 
-    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml
-
-    '
+    API definition to import into Postman can be downloaded at https://docs.salv.com/api/public.yaml'
   version: 1.0.9
   contact:
     name: Support
@@ -38,14 +36,14 @@ security:
 - OAuth2:
   - aml
 tags:
-- name: aml
+- name: AML
   x-displayName: Persons & Transactions
-  description: "This section contains all operations managing the state of persons and transactions.\n\nThere are three endpoints for creating or modifying a person, make sure to choose the right one for your task:\n* [Create new person](#tag/aml/operation/addPersonV2) will create a new person if a person with the same ID does not already exist in our system. \n* [Patch person](#tag/aml/operation/patchPersonV2) partially updates an existing person if this person exists in the system. A request to this endpoint will only update or add \nattributes which are provided in the request. Use this endpoint to update selected \nattributes of a person or to add new attributes without changing attributes not present in the request payload. This endpoint may also be used to update person type.\n* [Update person](#tag/aml/operation/updatePersonV2) updates an existing person if this person exists in the system. A request to this endpoint must contain both person type and attributes. \nA request to this endpoint overwrites both person type and attributes with the values given in the request.\n\nID of a person or a transaction is a case-sensitive text field in our system. Salv does not transform the ID in any way. Only the following characters are allowed: Alphanumerics `a-zA-Z0-9`, hyphens `-`, underscores `_`, colons `:`, dots `.`.\n\nAll requests must use ISO-8601 formatted timestamps. That includes defined fields (e.g. timestamp property in \"Create new transaction\" request) and custom key-value pairs (e.g. under attributes property in \"Create new person\" request).\n\nFor any data passed in person or transaction objects, the keys must adhere to the following rules:  \n- It must not contain a \"**.**\"\n- It must not consist of whitespaces\n\n## Example: Uploading person and transaction\nThis example shows how to upload data to use it later for monitoring or screening.\n\n### 1. Add a person if not already added\nAdd a new person, according to the documentation at [addPerson(POST)](#operation/addPersonV2).\n\nIf the person has already been added to Salv, then skip this step.\n\n#### With cURL\n```\ncurl --request POST \\\n  --url https://app.salv.com/api/v2/persons \\\n  --header 'Authorization: Bearer {yourBearerToken}' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n  \"id\": \"bbt12345\",\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"first_name\": \"Sheldon\",\n    \"last_name\": \"Cooper\",\n    \"dob\": \"1983-05-12\",\n    \"city\": \"Pasadena\",\n    \"street_address\": \"2311 North Los Robles Avenue\",\n    \"country\": \"US\",\n    \"onboarding_date\": \"2019-04-16\",\n    \"email\": \"sheldon.cooper@gmail.com\",\n    \"phone_number\": \"+1582693582\",\n    \"id_document\": \"passport\",\n    \"id_country\": \"US\",\n    \"gender\": \"F\"\n  }\n}'\n```\n\n#### With Python Requests\n```\nimport requests\n\nurl = \"https://app.salv.com/api/v2/persons\"\n\npayload = {\n    \"id\": \"bbt12345\",\n    \"type\": \"INDIVIDUAL\",\n    \"attributes\": {\n        \"first_name\": \"Sheldon\",\n        \"last_name\": \"Cooper\",\n        \"dob\": \"1983-05-12\",\n        \"city\": \"Pasadena\",\n        \"street_address\": \"2311 North Los Robles Avenue\",\n        \"country\": \"US\",\n        \"onboarding_date\": \"2019-04-16\",\n        \"email\": \"sheldon.cooper@gmail.com\",\n        \"phone_number\": \"+1582693582\",\n        \"id_document\": \"passport\",\n        \"id_country\": \"US\",\n        \"gender\": \"F\"\n    }\n}\nheaders = {\n    \"Content-Type\": \"application/json\",\n    \"Authorization\": \"{yourBearerToken}\"\n}\n\nresponse = requests.request(\"POST\", url, json=payload, headers=headers)\n\nprint(response.text)\n```\n### 2. Add a transaction\nAdd a new transaction, according to the documentation at [addTransaction(POST)](#operation/addTransaction).\n\n#### With cURL\n```\ncurl --request POST \\\n  --url https://app.salv.com/api/v1/persons/bbt12345/transactions \\\n  --header 'Authorization: Bearer {yourBearerToken}' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n  \"id\": \"aeio-1234567\",\n  \"attributes\": {\n    \"sender_name\": \"Sheldon Cooper\",\n    \"sender_account\": \"GB123456789\",\n    \"receiver_name\": \"Leonard Hofstadter\",\n    \"receiver_account\": \"DE987654321\",\n    \"amount\": \"15678.34\",\n    \"type\": \"wire_transfer\",\n    \"direction\": \"I\",\n    \"timestamp\": \"2022-01-20T08:48:39.000Z\"\n  }\n}'\n```\n\n#### With Python Requests\n```\nimport requests\n\nurl = \"https://app.salv.com/api/v1/persons/bbt12345/transactions\"\n\npayload = {\n    \"id\": \"aeio-1234567\",\n    \"attributes\": {\n        \"sender_name\": \"Sheldon Cooper\",\n        \"sender_account\": \"GB123456789\",\n        \"receiver_name\": \"Leonard Hofstadter\",\n        \"receiver_account\": \"DE987654321\",\n        \"amount\": \"15678.34\",\n        \"type\": \"wire_transfer\",\n        \"direction\": \"I\",\n        \"timestamp\": \"2022-01-20T08:48:39.000Z\"\n    }\n}\nheaders = {\n    \"Content-Type\": \"application/json\",\n    \"Authorization\": \"{yourBearerToken}\"\n}\n\nresponse = requests.request(\"POST\", url, json=payload, headers=headers)\n\nprint(response.text)\n```\n"
+  description: This section contains all operations managing the state of persons and transactions.
 paths:
   /v2/persons:
     post:
       tags:
-      - aml
+      - AML
       summary: Create new person
       description: Attributes supported maximum nesting depth is 2.
       operationId: addPersonV2
@@ -165,7 +163,7 @@ paths:
   /v2/persons/search:
     post:
       tags:
-      - aml
+      - AML
       summary: Fetch all persons
       operationId: findAllPersons
       requestBody:
@@ -184,9 +182,90 @@ paths:
   /v2/persons/{personId}:
     patch:
       tags:
-      - aml
+      - AML
       summary: Patch person
-      description: "Partial person update. Only attributes present in request will be added/updated. Attributes supported maximum\nnesting depth is 2.\n\nThis endpoint also supports optional person type update.\n\nIn case the operation is successful there will be an empty response.\n\n### Examples\n#### cURL\n```\n$ curl --request PATCH \\\n  --url https://app.salv.com/api/v2/persons/{personId} \\\n  --header 'Authorization: Bearer {yourBearerToken}' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"type\": \"LEGAL\",\n    \"attributes\": {\n      \"company_name\": \"Best Vacuum Cleaning Ltd.\"\n    }\n  }'\n```\n\n#### With Python Requests\n```\nimport requests\n\npayload = {\n  \"attributes\": {\n    \"phone_number\": \"(198)747-8241x9209\",\n    \"shareholders\": [{\n      \"id\": 1,\n      \"name\": \"Rose Doe\",\n      \"dob\": \"1970-01-01\",\n      \"email\": \"rose.doe@gmail.com\"\n    }]\n  }\n}\n\nresponse = requests.post(\n   'https://app.salv.com/api/v2/persons/{personId}',\n   auth = ({clientId}, {clientSecret}),\n   json = payload)\n\nresponse.raise_for_status()\n```\n"
+      description: 'Partial person update. Only attributes present in request will be added/updated. Attributes supported maximum
+
+        nesting depth is 2.
+
+
+        This endpoint also supports optional person type update.
+
+
+        In case the operation is successful there will be an empty response.
+
+
+        ### Examples
+
+        #### cURL
+
+        ```
+
+        $ curl --request PATCH \
+
+        --url https://app.salv.com/api/v2/persons/{personId} \
+
+        --header ''Authorization: Bearer {yourBearerToken}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --data ''{
+
+        "type": "LEGAL",
+
+        "attributes": {
+
+        "company_name": "Best Vacuum Cleaning Ltd."
+
+        }
+
+        }''
+
+        ```
+
+
+        #### With Python Requests
+
+        ```
+
+        import requests
+
+
+        payload = {
+
+        "attributes": {
+
+        "phone_number": "(198)747-8241x9209",
+
+        "shareholders": [{
+
+        "id": 1,
+
+        "name": "Rose Doe",
+
+        "dob": "1970-01-01",
+
+        "email": "rose.doe@gmail.com"
+
+        }]
+
+        }
+
+        }
+
+
+        response = requests.post(
+
+        ''https://app.salv.com/api/v2/persons/{personId}'',
+
+        auth = ({clientId}, {clientSecret}),
+
+        json = payload)
+
+
+        response.raise_for_status()
+
+        ```'
       operationId: patchPersonV2
       parameters:
       - name: personId
@@ -233,9 +312,89 @@ paths:
           description: Person not found
     put:
       tags:
-      - aml
+      - AML
       summary: Update person
-      description: "Person update. Attributes in the request will be used to replace existing ones and type will be updated. \nAttributes supported maximum nesting depth is 2.\n\nIn case the operation is successful there will be an empty response.\n\n### Examples\n#### cURL\n```\n$ curl --request PUT \\\n  --url https://app.salv.com/api/v2/persons/{personId} \\\n  --header 'Authorization: Bearer {yourBearerToken}' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"type\": \"LEGAL\",\n    \"attributes\": {\n      \"company_name\": \"Best Vacuum Cleaning Ltd.\"\n    }\n  }'\n```\n\n#### With Python Requests\n```\nimport requests\n\npayload = {\n  \"type\": \"INDIVIDUAL\",\n  \"attributes\": {\n    \"phone_number\": \"(198)747-8241x9209\",\n    \"shareholders\": [{\n      \"id\": 1,\n      \"name\": \"Rose Doe\",\n      \"dob\": \"1970-01-01\",\n      \"email\": \"rose.doe@gmail.com\"\n    }]\n  }\n}\n\nresponse = requests.post(\n   'https://app.salv.com/api/v2/persons/{personId}',\n   auth = ({clientId}, {clientSecret}),\n   json = payload)\n\nresponse.raise_for_status()\n```\n"
+      description: 'Person update. Attributes in the request will be used to replace existing ones and type will be updated.
+
+        Attributes supported maximum nesting depth is 2.
+
+
+        In case the operation is successful there will be an empty response.
+
+
+        ### Examples
+
+        #### cURL
+
+        ```
+
+        $ curl --request PUT \
+
+        --url https://app.salv.com/api/v2/persons/{personId} \
+
+        --header ''Authorization: Bearer {yourBearerToken}'' \
+
+        --header ''Content-Type: application/json'' \
+
+        --data ''{
+
+        "type": "LEGAL",
+
+        "attributes": {
+
+        "company_name": "Best Vacuum Cleaning Ltd."
+
+        }
+
+        }''
+
+        ```
+
+
+        #### With Python Requests
+
+        ```
+
+        import requests
+
+
+        payload = {
+
+        "type": "INDIVIDUAL",
+
+        "attributes": {
+
+        "phone_number": "(198)747-8241x9209",
+
+        "shareholders": [{
+
+        "id": 1,
+
+        "name": "Rose Doe",
+
+        "dob": "1970-01-01",
+
+        "email": "rose.doe@gmail.com"
+
+        }]
+
+        }
+
+        }
+
+
+        response = requests.post(
+
+        ''https://app.salv.com/api/v2/persons/{personId}'',
+
+        auth = ({clientId}, {clientSecret}),
+
+        json = payload)
+
+
+        response.raise_for_status()
+
+        ```'
       operationId: updatePersonV2
       parameters:
       - name: personId
@@ -281,7 +440,7 @@ paths:
     get:
       deprecated: true
       tags:
-      - aml
+      - AML
       summary: Fetch all persons
       operationId: findAllPersonsDeprecated
       description: NB! If there are more than 10000 results then the API shows the number of total results as 10000 and you can't paginate past the 10000th result.
@@ -354,9 +513,9 @@ paths:
                       category: CUSTOMER
     post:
       tags:
-      - aml
+      - AML
       summary: Create new person (v1)
-      description: Use [Create new person v2](#tag/aml/operation/addPersonV2) instead.
+      description: Use Create new person v2 instead.
       operationId: addPerson
       deprecated: true
       requestBody:
@@ -462,7 +621,7 @@ paths:
   /v1/persons/{personId}:
     get:
       tags:
-      - aml
+      - AML
       summary: Fetch person by id
       operationId: findPersonById
       x-codeSamples:
@@ -644,9 +803,9 @@ paths:
           description: Person not found
     patch:
       tags:
-      - aml
+      - AML
       summary: Patch person (v1)
-      description: Use [Patch person v2](#tag/aml/operation/patchPersonV2) instead.
+      description: Use Patch person v2 instead.
       operationId: updatePerson
       deprecated: true
       parameters:
@@ -675,7 +834,7 @@ paths:
   /v1/persons/{personId}/transactions:
     get:
       tags:
-      - aml
+      - AML
       summary: Fetch all person transactions
       description: NB! If there are more than 10000 results then the API shows the number of total results as 10000 and you can't paginate past the 10000th result.
       operationId: findAllPersonTransactions
@@ -701,7 +860,7 @@ paths:
                 $ref: models.yaml#/components/schemas/TransactionsPage
     post:
       tags:
-      - aml
+      - AML
       summary: Create new transaction
       operationId: addTransaction
       x-codeSamples:
@@ -945,7 +1104,7 @@ paths:
   /v1/persons/{personId}/transactions/{transactionId}:
     get:
       tags:
-      - aml
+      - AML
       summary: Fetch transaction by id
       operationId: findTransactionByIdAndPersonId
       parameters:
@@ -1069,7 +1228,7 @@ paths:
           description: Person or Transaction not found
     patch:
       tags:
-      - aml
+      - AML
       description: Updates transaction. Currently status is the only attribute that can be updated.
       summary: Update transaction
       operationId: updateTransaction
@@ -1110,7 +1269,7 @@ paths:
   /v1/persons/{personId}/statuses:
     get:
       tags:
-      - aml
+      - AML
       summary: Fetch history of status changes for the person
       operationId: findStatusesHistory
       parameters:
