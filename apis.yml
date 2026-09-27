@@ -47,6 +47,15 @@ created: '2026-07-17'
 modified: '2026-07-21'
 tags:
 - Company
+- AML
+- Financial Crime
+- Compliance
+- RegTech
+- Sanctions Screening
+- Transaction Monitoring
+- Fraud Prevention
+tags_raw:
+- Company
 - Anti-Money Laundering
 - Financial Crime
 - Compliance
@@ -56,7 +65,7 @@ tags:
 - Fraud Prevention
 apis:
 - aid: salv:salv-alert-api
-  name: Salv alert API
+  name: Salv Alert API
   description: The alert API from Salv — 1 operation(s) for alert.
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
@@ -68,7 +77,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-alert-api-openapi.yml
 - aid: salv:salv-alerts-api
-  name: Salv alerts API
+  name: Salv Alerts API
   description: >-
     Salv has multiple properties that are associated with individual alerts and influence alert management
     process based on their assignment. Using the initial alert ID and TYPE that are generated after different
@@ -89,7 +98,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-alerts-api-openapi.yml
 - aid: salv:salv-aml-api
-  name: Salv aml API
+  name: Salv Aml API
   description: "This section contains all operations managing the state of persons and transactions.\n\
     \nThere are three endpoints for creating or modifying a person, make sure to choose the right one\
     \ for your task:\n* [Create new person](#tag/aml/operation/addPersonV2) will create a new person if\
@@ -152,7 +161,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-aml-api-openapi.yml
 - aid: salv:salv-custom-list-record-api
-  name: Salv custom-list-record API
+  name: Salv Custom List Record API
   description: >-
     Endpoints to add, update, delete and get custom list records.
 
@@ -177,7 +186,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-custom-list-record-api-openapi.yml
 - aid: salv:salv-custom-list-usable-field-public-api
-  name: Salv custom-list-usable-field-public API
+  name: Salv Custom List Usable Field Public API
   description: >-
     Custom list usable fields can be used in [Screening search](#tag/screening-searches/operation/search)
   humanURL: https://docs.salv.com/
@@ -188,7 +197,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-custom-list-usable-field-public-api-openapi.yml
 - aid: salv:salv-data-upload-api
-  name: Salv data-upload API
+  name: Salv Data Upload API
   description: "## Steps to upload data using CSV\n1. Format the  csv file and add all the mandatory data\
     \ fields indicated in the  [User Manual](https://help.salv.com/en/articles/154650-data-overview)\n\
     \n2. Upload the [csv file via API](#tag/data-upload/operation/uploadData).  Note: the upload API response\
@@ -238,7 +247,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-data-upload-api-openapi.yml
 - aid: salv:salv-manual-alerts-api
-  name: Salv manual-alerts API
+  name: Salv Manual Alerts API
   description: >-
     Manual alerts allow compliance officers to create alerts manually for persons or transactions that
     require investigation
@@ -259,7 +268,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-manual-alerts-api-openapi.yml
 - aid: salv:salv-monitoring-checks-api
-  name: Salv monitoring-checks API
+  name: Salv Monitoring Checks API
   description: >-
     Person & Transaction monitoring.
 
@@ -282,7 +291,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-monitoring-checks-api-openapi.yml
 - aid: salv:salv-note-api
-  name: Salv note API
+  name: Salv Note API
   description: The note API from Salv — 1 operation(s) for note.
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
@@ -294,7 +303,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-note-api-openapi.yml
 - aid: salv:salv-risk-api
-  name: Salv risk API
+  name: Salv Risk API
   description: "Risks levels are assigned to persons according to configured risk rules. It is up to client\
     \ how\nto interpret each particular level.\n\nRisk rules are configured in Salv UI.\n\nPerson risk\
     \ is scored every time one of the following triggering events occurs:\n- the person is created\n-\
@@ -308,14 +317,15 @@ apis:
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
   tags:
-  - Risk
+  - Risk Management
   tags_raw:
   - risk
+  - Risk
   properties:
   - type: OpenAPI
     url: openapi/salv-risk-api-openapi.yml
 - aid: salv:salv-screening-alerts-api
-  name: Salv screening-alerts API
+  name: Salv Screening Alerts API
   description: >-
     Screening alert is created when a particular field of a particular person matches against one of the
     screening lists. Screening alert has a list of hits, each of which represent one matched record from
@@ -329,7 +339,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-screening-alerts-api-openapi.yml
 - aid: salv:salv-screening-checks-api
-  name: Salv screening-checks API
+  name: Salv Screening Checks API
   description: Screening checks for transaction and person.
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
@@ -339,7 +349,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-screening-checks-api-openapi.yml
 - aid: salv:salv-screening-list-groups-api
-  name: Salv screening-list-groups API
+  name: Salv Screening List Groups API
   description: >-
     Screening selectors can be used in screening search. These can be used in [Screening search](#tag/screening-searches/operation/search)
   humanURL: https://docs.salv.com/
@@ -350,7 +360,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-screening-list-groups-api-openapi.yml
 - aid: salv:salv-screening-searches-api
-  name: Salv screening-searches API
+  name: Salv Screening Searches API
   description: >-
     Screening search can be used to check any name against screening lists without first uploading a person
     or a transaction.
@@ -362,7 +372,7 @@ apis:
   - type: OpenAPI
     url: openapi/salv-screening-searches-api-openapi.yml
 - aid: salv:salv-unresolved-alerts-api
-  name: Salv unresolved-alerts API
+  name: Salv Unresolved Alerts API
   description: Endpoints to check if given entity has anything unresolved
   humanURL: https://docs.salv.com/
   baseURL: https://app.salv.com/api
