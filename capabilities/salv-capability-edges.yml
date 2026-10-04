@@ -1,0 +1,73 @@
+slug: salv
+provider: Salv
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 6
+edges:
+- tag: monitoring-checks
+  spec_file: salv-monitoring-checks-api-openapi.yml
+  capability_id: BC-130.10
+  capability_id_l1: BC-130
+  capability_name: Regulatory Compliance Management
+  confidence: 0.8
+  evidence: POST /v1/transactions/{transactionId}/monitoring-checks  runTransactionMonitoringChecks  Run
+    real-time (ONLINE) transaction monitoring checks
+  reason: Real-time transaction and person monitoring checks are the AML transaction-monitoring obligation;
+    in this frame that maps to Regulatory Compliance Management (sector-specific regulation).
+- tag: screening-checks
+  spec_file: salv-screening-checks-api-openapi.yml
+  capability_id: BC-130.10
+  capability_id_l1: BC-130
+  capability_name: Regulatory Compliance Management
+  confidence: 0.8
+  evidence: POST /v1/persons/{id}/screening-checks  checkPerson  Screen person
+  reason: Screening persons and transactions against sanctions/PEP lists is a regulated AML/CTF control;
+    Regulatory Compliance Management is the only candidate that fits this sector-specific obligation.
+- tag: screening-alerts
+  spec_file: salv-screening-alerts-api-openapi.yml
+  capability_id: BC-130.10
+  capability_id_l1: BC-130
+  capability_name: Regulatory Compliance Management
+  confidence: 0.75
+  evidence: GET /v1/screening-alerts/{screeningAlertId}/hits  getScreeningAlertHits  Get screening alert
+    hits
+  reason: Screening alert hits are sanctions/PEP/adverse-media match results — an AML/sanctions compliance
+    activity, mapped to Regulatory Compliance Management.
+- tag: manual-alerts
+  spec_file: salv-manual-alerts-api-openapi.yml
+  capability_id: BC-130.10
+  capability_id_l1: BC-130
+  capability_name: Regulatory Compliance Management
+  confidence: 0.7
+  evidence: POST /v1/manual-alerts  createManualAlert  Create manual alert
+  reason: Alerts here are financial-crime alerts raised in an AML case workflow (vendor is a FinCrime/AML
+    platform), so creating and updating them supports AML regulatory compliance. No AML-specific capability
+    exists in the frame, so Regulatory Compliance Management is the closest honest fit.
+- tag: screening-searches
+  spec_file: salv-screening-searches-api-openapi.yml
+  capability_id: BC-130.10
+  capability_id_l1: BC-130
+  capability_name: Regulatory Compliance Management
+  confidence: 0.7
+  evidence: POST /v2/screening-searches  search  Run screening search
+  reason: Although the tag reads like generic search, on this AML platform the operation runs a sanctions/PEP/adverse-media
+    screening search, which is a regulatory compliance control. Thin surface (one operation) so confidence
+    is moderate.
+- tag: unresolved-alerts
+  spec_file: salv-unresolved-alerts-api-openapi.yml
+  capability_id: BC-130.10
+  capability_id_l1: BC-130
+  capability_name: Regulatory Compliance Management
+  confidence: 0.7
+  evidence: hasUnresolvedPersonAlerts  Check for unresolved monitoring or screening person alerts
+  reason: Checks whether AML monitoring/screening alerts remain unresolved for a person or transaction
+    — part of the AML alert-disposition compliance workflow.
